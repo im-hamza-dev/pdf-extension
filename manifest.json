@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Screenshot → PDF (Live Builder)",
+  "version": "1.0.0",
+  "description": "Capture screenshots, queue them as pages, and export a multi-page PDF.",
+  "permissions": ["tabs", "activeTab", "storage", "downloads"],
+  "action": {
+    "default_title": "Screenshot → PDF",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icon01.jpg",
+    "32": "icon01.jpg",
+    "128": "icon01.jpg"
+  },
+  "commands": {
+    "capture-screenshot": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Capture visible tab and add to PDF queue"
+    }
+  }
+}
