@@ -19,6 +19,8 @@ async function addToQueue(dataUrl) {
     createdAt: Date.now(),
   });
   await setQueue(queue);
+  chrome.runtime.sendMessage({ type: "QUEUE_UPDATED" });
+
   return queue;
 }
 
@@ -30,10 +32,15 @@ async function clearQueue() {
 async function captureVisible() {
   console.log("capture visible calls");
   const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: "png" });
-  await addToQueue(dataUrl);
-  // optional: show a toast via popup messaging, or use badge
-  chrome.action.setBadgeText({ text: String((await getQueue()).length) });
-  chrome.action.setBadgeBackgroundColor({ color: "#3b82f6" });
+  chrome.windows.create({
+    url:
+      chrome.runtime.getURL("annotation.html") +
+      "?img=" +
+      encodeURIComponent(dataUrl),
+    type: "popup",
+    width: 1000,
+    height: 800,
+  });
 }
 
 // Messages from popup
@@ -75,6 +82,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           saveAs: true,
         });
         sendResponse({ ok: true });
+      } else if (message.type === "saveAnnotatedImage") {
+        console.log("Annotated image received:", message.dataUrl);
+        // Store it in extension storage
+        await addToQueue(message.dataUrl);
+        // optional: show a toast via popup messaging, or use badge
+        chrome.action.setBadgeText({ text: String((await getQueue()).length) });
+        chrome.action.setBadgeBackgroundColor({ color: "#3b82f6" });
       } else {
         sendResponse({ ok: false, error: "Unknown message type" });
       }

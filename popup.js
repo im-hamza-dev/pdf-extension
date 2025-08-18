@@ -14,6 +14,12 @@ function send(msg) {
   return new Promise((resolve) => chrome.runtime.sendMessage(msg, resolve));
 }
 
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === "QUEUE_UPDATED") {
+    refresh();
+  }
+});
+
 async function refresh() {
   const { ok, queue, error } = await send({ type: "GET_LIST" });
   if (!ok) return console.error(error);
