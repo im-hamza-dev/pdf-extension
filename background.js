@@ -89,6 +89,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         // optional: show a toast via popup messaging, or use badge
         chrome.action.setBadgeText({ text: String((await getQueue()).length) });
         chrome.action.setBadgeBackgroundColor({ color: "#3b82f6" });
+        sendResponse({ ok: true });
       } else {
         sendResponse({ ok: false, error: "Unknown message type" });
       }

@@ -76,12 +76,22 @@ function AnnotationApp() {
     const editedDataURL = canvas.toDataURL('image/png');
 
     // Send back to background for storage
-    chrome.runtime.sendMessage({
-      type: 'saveAnnotatedImage',
-      dataUrl: editedDataURL,
-    });
-
-    window.close(); // Close popup after saving
+    chrome.runtime.sendMessage(
+      {
+        type: 'saveAnnotatedImage',
+        dataUrl: editedDataURL,
+      },
+      (response) => {
+        // Response received, now close the window
+        if (response?.ok) {
+          window.close();
+        } else {
+          console.error('Failed to save annotation:', response?.error);
+          // Still close the window even on error
+          window.close();
+        }
+      }
+    );
   };
 
   return (
