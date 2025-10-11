@@ -34,7 +34,7 @@ async function captureVisible() {
   const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: "png" });
   chrome.windows.create({
     url:
-      chrome.runtime.getURL("annotation.html") +
+      chrome.runtime.getURL("annotation/annotation.html") +
       "?img=" +
       encodeURIComponent(dataUrl),
     type: "popup",
