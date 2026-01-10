@@ -1,65 +1,41 @@
 body {
   margin: 0;
-  background: #222;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 0;
+  background: #1e1e1e;
   height: 100vh;
   overflow: hidden;
 }
 
 #root {
   width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100vh;
+  overflow: hidden;
 }
 
-#canvas {
-  border: 2px solid #fff;
-  cursor: crosshair;
-  max-width: 90vw;
-  max-height: 90vh;
+/* tui-image-editor container */
+.tui-image-editor {
+  width: 100% !important;
+  height: 100vh !important;
 }
 
-.toolbar {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  background: #fff;
-  padding: 6px;
-  border-radius: 8px;
-  display: flex;
-  gap: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+/* Ensure the editor takes full viewport */
+.tui-image-editor-container {
+  width: 100% !important;
+  height: 100vh !important;
 }
 
-.toolbar button {
-  padding: 8px 12px;
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  background: #3b82f6;
-  color: white;
-  font-size: 14px;
-  transition: all 0.2s ease;
+/* Ensure menus are clickable */
+.tui-image-editor-menu,
+.tui-image-editor-submenu,
+.tui-image-editor-menu-item,
+.tui-image-editor-menu-item button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
-.toolbar button:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-}
-
-.toolbar button:active {
-  transform: translateY(0);
-}
-
-.toolbar button.secondary {
-  background: #e5e7eb;
-  color: #333;
-}
-
-.toolbar button.secondary:hover {
-  background: #d1d5db;
+/* Ensure header buttons are clickable */
+.tui-image-editor-header button,
+.tui-image-editor-controls button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }

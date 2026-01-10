@@ -64,6 +64,12 @@ function App() {
     await sendMessage({ type: 'REORDER', order });
   }
 
+  async function handleEdit(id) {
+    await sendMessage({ type: 'EDIT_IMAGE', id });
+    // Don't need to refresh immediately - the edit will update the item
+    // The queue will refresh when the user saves from the editor
+  }
+
   return (
     <div>
       <div className="row">
@@ -83,6 +89,7 @@ function App() {
         onRemove={handleRemove}
         onSavePng={handleSavePng}
         onReorder={handleReorder}
+        onEdit={handleEdit}
       />
     </div>
   );

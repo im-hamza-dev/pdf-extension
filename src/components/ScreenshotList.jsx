@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ScreenshotItem from './ScreenshotItem';
 
-function ScreenshotList({ queue, onRemove, onSavePng, onReorder }) {
+function ScreenshotList({ queue, onRemove, onSavePng, onReorder, onEdit }) {
   const [draggedId, setDraggedId] = useState(null);
 
   const handleDragStart = (e, id) => {
@@ -47,6 +47,7 @@ function ScreenshotList({ queue, onRemove, onSavePng, onReorder }) {
           onDragOver={handleDragOver}
           onRemove={onRemove}
           onSavePng={onSavePng}
+          onEdit={onEdit}
         />
       ))}
     </div>

@@ -8,6 +8,7 @@ function ScreenshotItem({
   onDragOver,
   onRemove,
   onSavePng,
+  onEdit,
 }) {
   const date = new Date(item.createdAt);
 
@@ -24,6 +25,9 @@ function ScreenshotItem({
       <img className="thumb" src={item.dataUrl} alt="Screenshot thumbnail" />
       <div className="meta">Page • {date.toLocaleTimeString()}</div>
       <div className="actions">
+        <button title="Edit" onClick={() => onEdit(item.id)}>
+          ✏️
+        </button>
         <button title="Save PNG" onClick={() => onSavePng(item.dataUrl)}>
           💾
         </button>
