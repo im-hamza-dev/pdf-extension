@@ -6,7 +6,7 @@
   "permissions": ["tabs", "activeTab", "storage", "downloads"],
   "action": {
     "default_title": "Screenshot → PDF",
-    "default_popup": "popup.html"
+    "default_popup": "src/popup/index.html"
   },
   "background": {
     "service_worker": "background.js",
