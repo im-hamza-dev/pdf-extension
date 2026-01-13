@@ -21,6 +21,7 @@ function copyStaticFiles() {
 }
 
 export default defineConfig({
+  base: './', // Use relative paths for Chrome extension
   plugins: [react(), copyStaticFiles()],
   build: {
     outDir: "dist",
@@ -29,6 +30,7 @@ export default defineConfig({
       input: {
         popup: resolve(__dirname, "src/popup/index.html"),
         annotation: resolve(__dirname, "src/annotation/index.html"),
+        'pdf-editor': resolve(__dirname, "src/pdf-editor/index.html"),
       },
       output: {
         entryFileNames: (chunkInfo) => {

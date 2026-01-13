@@ -45,6 +45,16 @@ function App() {
       alert('No pages yet. Capture something first.');
       return;
     }
+    // Open PDF layout editor in new tab
+    await sendMessage({ type: 'OPEN_PDF_EDITOR' });
+  }
+
+  async function handleQuickExport() {
+    if (!queue || queue.length === 0) {
+      alert('No pages yet. Capture something first.');
+      return;
+    }
+    // Quick export without layout editor (old behavior)
     const images = queue.map((q) => q.dataUrl);
     await exportPDF(images);
   }
@@ -77,7 +87,10 @@ function App() {
           📸 Capture
         </button>
         <button className="secondary" onClick={handleExport}>
-          📥 Export PDF
+          📄 Layout & Export PDF
+        </button>
+        <button className="secondary" onClick={handleQuickExport} title="Quick export without layout editor">
+          ⚡ Quick Export
         </button>
         <button className="danger" onClick={handleClear}>
           🗑️ Clear
