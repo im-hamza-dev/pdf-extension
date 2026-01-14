@@ -4,13 +4,16 @@ import { exportPDFWithLayout } from '../utils/pdfExport';
 import { LeftControls } from './components/LeftControls';
 import { RightPreview } from './components/RightPreview';
 import { PageNavigation } from './components/PageNavigation';
+import { ImageGallery } from './components/ImageGallery';
 import { createLayoutItem } from './utils/layoutHelpers';
 import { LAYOUT_TYPES } from './utils/constants';
 
 function PDFLayoutEditor() {
   const [queue, setQueue] = useState([]);
+  const [localImages, setLocalImages] = useState([]);
   const [pages, setPages] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [pendingReplaceSlot, setPendingReplaceSlot] = useState(null);
 
   useEffect(() => {
     loadQueue();
@@ -204,6 +207,78 @@ function PDFLayoutEditor() {
     updateCurrentPage({ images: [...currentPage.images, newImage] });
   };
 
+  const handleImageSelect = async (image, slotIndex = null) => {
+    if (!image) {
+      // If no image provided, nothing to do
+      return;
+    }
+
+    const maxImages = currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+                     currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+                     currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+
+    // Check if we have a pending replace operation
+    const targetSlot = pendingReplaceSlot !== null ? pendingReplaceSlot : (slotIndex !== null ? slotIndex : null);
+
+    if (targetSlot !== null && targetSlot >= 0) {
+      // Replace image at specific slot
+      if (targetSlot >= maxImages) {
+        setPendingReplaceSlot(null);
+        return;
+      }
+      
+      const newItem = await createLayoutItem(image, targetSlot, currentPage.layoutSettings.layout, maxImages);
+      const newImage = {
+        id: newItem.id,
+        url: newItem.imageUrl,
+        imageUrl: newItem.imageUrl,
+        dataUrl: newItem.dataUrl,
+        alt: newItem.title || 'Screenshot',
+        imageId: newItem.imageId,
+      };
+
+      const newImages = [...currentPage.images];
+      // Ensure array is long enough
+      while (newImages.length <= targetSlot) {
+        newImages.push(null);
+      }
+      newImages[targetSlot] = newImage;
+      // Remove nulls at the end
+      while (newImages.length > 0 && newImages[newImages.length - 1] === null) {
+        newImages.pop();
+      }
+      updateCurrentPage({ images: newImages });
+      setPendingReplaceSlot(null);
+    } else {
+      // Add to first available slot (when user clicks image in gallery)
+      if (currentPage.images.length >= maxImages) {
+        alert(`Maximum ${maxImages} images allowed for this layout. Please change layout or remove an image first.`);
+        return;
+      }
+
+      await handleAddImage(image);
+    }
+  };
+
+  const handleReplaceRequest = (slotIndex) => {
+    // If clicking the same slot, cancel replace mode
+    if (pendingReplaceSlot === slotIndex) {
+      setPendingReplaceSlot(null);
+    } else {
+      setPendingReplaceSlot(slotIndex);
+    }
+  };
+
+  const handleCancelReplace = () => {
+    setPendingReplaceSlot(null);
+  };
+
+  const handleLocalImageAdd = (imageData) => {
+    // Add to local images list
+    setLocalImages(prev => [...prev, imageData]);
+    // Don't automatically add to page - user should select from gallery
+  };
+
   async function handleExportPDF() {
     try {
       // Convert new format to old format for export
@@ -255,9 +330,14 @@ function PDFLayoutEditor() {
     alert('Draft saved!');
   };
 
-  const availableImages = queue.filter(
+  // Combine screenshots and local images
+  const allAvailableImages = [...queue, ...localImages];
+  
+  const availableImages = allAvailableImages.filter(
     (img) => !currentPage.images.some((item) => item.imageId === img.id)
   );
+
+  const selectedImageIds = currentPage.images.map(img => img.imageId).filter(Boolean);
 
   return (
     <div className="h-screen flex flex-col bg-[#f5f6f8]">
@@ -296,7 +376,7 @@ function PDFLayoutEditor() {
         </div>
       </header>
 
-      {/* Main Content - Split View */}
+      {/* Main Content - Three Column Layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Side - Controls */}
         <div className="w-[420px] flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto">
@@ -308,13 +388,28 @@ function PDFLayoutEditor() {
           />
         </div>
 
-        {/* Right Side - Preview */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Center - Preview */}
+        <div className="flex-1 overflow-y-auto" onClick={handleCancelReplace}>
           <RightPreview
             page={currentPage}
             onImagesChange={handleImagesChange}
             availableImages={availableImages}
             onAddImage={handleAddImage}
+            onImageSelect={handleImageSelect}
+            onLocalImageAdd={handleLocalImageAdd}
+            onReplaceRequest={handleReplaceRequest}
+            pendingReplaceSlot={pendingReplaceSlot}
+          />
+        </div>
+
+        {/* Right Side - Image Gallery */}
+        <div className="w-[320px] flex-shrink-0 overflow-hidden">
+          <ImageGallery
+            screenshots={allAvailableImages}
+            onImageSelect={handleImageSelect}
+            onLocalImageAdd={handleLocalImageAdd}
+            selectedImageIds={selectedImageIds}
+            pendingReplaceSlot={pendingReplaceSlot}
           />
         </div>
       </div>

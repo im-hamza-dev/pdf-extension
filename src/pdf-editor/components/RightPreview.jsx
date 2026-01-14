@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getGridClass, getSpacingClass, getBackgroundStyle } from '../utils/layoutHelpers.js';
 import { LAYOUT_TYPES } from '../utils/constants.js';
 
@@ -27,8 +27,10 @@ const TrashIcon = ({ className }) => (
   </svg>
 );
 
-export function RightPreview({ page, onImagesChange, availableImages = [], onAddImage }) {
+export function RightPreview({ page, onImagesChange, availableImages = [], onAddImage, onImageSelect, onLocalImageAdd, onReplaceRequest, pendingReplaceSlot }) {
   const { metadata, images, layoutSettings } = page;
+  const [draggedSlotIndex, setDraggedSlotIndex] = useState(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   const getMaxImages = () => {
     switch (layoutSettings.layout) {
@@ -42,47 +44,132 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
 
   const maxImages = getMaxImages();
 
-  const handleAddImage = () => {
-    if (images.length < maxImages && availableImages.length > 0) {
-      const imageToAdd = availableImages[0];
-      const newImage = {
-        id: imageToAdd.id || Date.now().toString(),
-        url: imageToAdd.dataUrl || imageToAdd.url,
-        imageUrl: imageToAdd.dataUrl || imageToAdd.url,
-        dataUrl: imageToAdd.dataUrl || imageToAdd.url,
-        alt: imageToAdd.title || `Screenshot ${images.length + 1}`,
-        imageId: imageToAdd.id,
-      };
-      onImagesChange([...images, newImage]);
+  const handleAddImage = (selectedImage = null) => {
+    if (images.length >= maxImages) {
+      return;
     }
+
+    const imageToAdd = selectedImage || (availableImages.length > 0 ? availableImages[0] : null);
+    if (!imageToAdd) return;
+
+    const newImage = {
+      id: imageToAdd.id || Date.now().toString(),
+      url: imageToAdd.dataUrl || imageToAdd.url || imageToAdd.imageUrl,
+      imageUrl: imageToAdd.dataUrl || imageToAdd.url || imageToAdd.imageUrl,
+      dataUrl: imageToAdd.dataUrl || imageToAdd.url || imageToAdd.imageUrl,
+      alt: imageToAdd.title || `Screenshot ${images.length + 1}`,
+      imageId: imageToAdd.id,
+    };
+    onImagesChange([...images, newImage]);
   };
 
-  const handleReplaceImage = (index) => {
-    if (availableImages.length > 0) {
-      const imageToAdd = availableImages[0];
-      const newImages = [...images];
-      newImages[index] = {
-        ...newImages[index],
-        id: imageToAdd.id || Date.now().toString(),
-        url: imageToAdd.dataUrl || imageToAdd.url,
-        imageUrl: imageToAdd.dataUrl || imageToAdd.url,
-        dataUrl: imageToAdd.dataUrl || imageToAdd.url,
-        alt: imageToAdd.title || `Screenshot ${index + 1} (Updated)`,
-        imageId: imageToAdd.id,
-      };
-      onImagesChange(newImages);
-    }
+  const handleReplaceImage = (index, selectedImage = null) => {
+    const imageToAdd = selectedImage || (availableImages.length > 0 ? availableImages[0] : null);
+    if (!imageToAdd) return;
+
+    const newImages = [...images];
+    newImages[index] = {
+      ...newImages[index],
+      id: imageToAdd.id || Date.now().toString(),
+      url: imageToAdd.dataUrl || imageToAdd.url || imageToAdd.imageUrl,
+      imageUrl: imageToAdd.dataUrl || imageToAdd.url || imageToAdd.imageUrl,
+      dataUrl: imageToAdd.dataUrl || imageToAdd.url || imageToAdd.imageUrl,
+      alt: imageToAdd.title || `Screenshot ${index + 1} (Updated)`,
+      imageId: imageToAdd.id,
+    };
+    onImagesChange(newImages);
   };
 
   const handleRemoveImage = (index) => {
     onImagesChange(images.filter((_, i) => i !== index));
   };
 
+  // Handle drag & drop for local files
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = async (e, slotIndex = null) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    setDraggedSlotIndex(null);
+
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+
+    if (files.length > 0) {
+      const file = files[0];
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const imageData = {
+        id: `local-${Date.now()}-${Math.random()}`,
+        dataUrl,
+        createdAt: Date.now(),
+        title: file.name,
+        isLocal: true
+      };
+
+      if (onLocalImageAdd) {
+        onLocalImageAdd(imageData);
+      }
+
+      // Add or replace image in slot
+      if (slotIndex !== null) {
+        if (images[slotIndex]) {
+          handleReplaceImage(slotIndex, imageData);
+        } else {
+          // Find first empty slot
+          const emptySlotIndex = images.length;
+          handleAddImage(imageData);
+        }
+      } else {
+        // Find first empty slot or add to end
+        if (images.length < maxImages) {
+          handleAddImage(imageData);
+        }
+      }
+    }
+  };
+
+  // Handle slot click - when user clicks empty slot, they should select from gallery
+  const handleSlotClick = (index) => {
+    // Empty slot clicked - user should select from gallery
+    // The gallery component will handle the selection
+  };
+
   // Create placeholder slots based on layout
   const slots = Array.from({ length: maxImages }, (_, i) => images[i] || null);
 
   return (
-    <div className="p-8 flex items-center justify-center min-h-full">
+    <div 
+      className="p-8 flex items-center justify-center min-h-full relative"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={(e) => handleDrop(e, null)}
+    >
+      {isDraggingOver && (
+        <div className="absolute inset-0 bg-[#4974a7]/10 border-2 border-dashed border-[#4974a7] z-50 flex items-center justify-center pointer-events-none rounded-lg">
+          <div className="text-center">
+            <UploadIcon className="w-12 h-12 text-[#4974a7] mx-auto mb-2" />
+            <p className="text-[#4974a7] font-medium">Drop image here</p>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-4xl">
         {/* Preview Label */}
         <div className="mb-4 flex items-center justify-between">
@@ -142,8 +229,35 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
               {slots.map((image, index) => (
                 <div
                   key={index}
-                  className="group relative rounded-lg overflow-hidden border-2 border-dashed border-gray-300 bg-gray-50 transition-all hover:border-[#4974a7]"
+                  className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all ${
+                    image 
+                      ? pendingReplaceSlot === index
+                        ? 'border-[#4974a7] ring-2 ring-[#4974a7]/30'
+                        : 'border-gray-300 hover:border-[#4974a7]' 
+                      : draggedSlotIndex === index
+                      ? 'border-[#4974a7] bg-[#4974a7]/5'
+                      : pendingReplaceSlot === index
+                      ? 'border-[#4974a7] bg-[#4974a7]/5'
+                      : 'border-gray-300 hover:border-[#4974a7]'
+                  }`}
                   style={{ aspectRatio: '16/10' }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!image) {
+                      setDraggedSlotIndex(index);
+                    }
+                  }}
+                  onDragLeave={() => {
+                    setDraggedSlotIndex(null);
+                  }}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!image) {
+                      handleSlotClick(index);
+                    }
+                  }}
                 >
                   {image ? (
                     <>
@@ -155,17 +269,28 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                       
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        {availableImages.length > 0 && (
-                          <button
-                            onClick={() => handleReplaceImage(index)}
-                            className="px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm"
-                          >
-                            <UploadIcon className="w-4 h-4" />
-                            Replace
-                          </button>
-                        )}
                         <button
-                          onClick={() => handleRemoveImage(index)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onReplaceRequest) {
+                              onReplaceRequest(index);
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${
+                            pendingReplaceSlot === index 
+                              ? 'bg-[#4974a7] text-white hover:bg-[#3d6290]' 
+                              : 'bg-white text-gray-900'
+                          }`}
+                          title={pendingReplaceSlot === index ? "Click an image from the gallery to replace" : "Click to replace this image"}
+                        >
+                          <UploadIcon className="w-4 h-4" />
+                          {pendingReplaceSlot === index ? 'Select from Gallery' : 'Replace'}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(index);
+                          }}
                           className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 text-sm"
                         >
                           <TrashIcon className="w-4 h-4" />
@@ -174,19 +299,15 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                       </div>
                     </>
                   ) : (
-                    <button
-                      onClick={handleAddImage}
-                      disabled={availableImages.length === 0}
-                      className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#4974a7] hover:bg-[#4974a7]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#4974a7] hover:bg-[#4974a7]/5 transition-all cursor-pointer">
                       <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#4974a7]/10 flex items-center justify-center transition-colors">
                         <PlusIcon className="w-6 h-6" />
                       </div>
-                      <div className="text-sm">
+                      <div className="text-sm text-center">
                         <div className="font-medium">Add Image</div>
-                        <div className="text-xs text-gray-400">Click to add screenshot</div>
+                        <div className="text-xs text-gray-400">Click or drag & drop</div>
                       </div>
-                    </button>
+                    </div>
                   )}
                 </div>
               ))}
@@ -197,34 +318,13 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
               <div className="mt-8 flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-white/50">
                 <ImageIcon className="w-16 h-16 text-gray-300 mb-4" />
                 <h3 className="text-lg text-gray-600 mb-2">No images added yet</h3>
-                <p className="text-sm text-gray-400 mb-4">Click the + button above to add screenshots</p>
-                {availableImages.length > 0 && (
-                  <button
-                    onClick={handleAddImage}
-                    className="px-5 py-2.5 bg-[#4974a7] text-white rounded-lg hover:bg-[#3d6290] transition-colors flex items-center gap-2"
-                  >
-                    <PlusIcon className="w-4 h-4" />
-                    Add First Image
-                  </button>
-                )}
+                <p className="text-sm text-gray-400 mb-4">Select from gallery, drag & drop, or click to add</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Quick Actions Below Preview */}
-        {images.length > 0 && images.length < maxImages && availableImages.length > 0 && (
-          <div className="mt-4 flex justify-center">
-            <button
-              onClick={handleAddImage}
-              className="px-6 py-3 bg-white border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-[#4974a7] hover:text-[#4974a7] hover:bg-[#4974a7]/5 transition-all flex items-center gap-2"
-            >
-              <PlusIcon className="w-5 h-5" />
-              Add Another Image ({images.length}/{maxImages})
-            </button>
-          </div>
-        )}
-
         {images.length >= maxImages && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800 text-center">
