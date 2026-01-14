@@ -191,11 +191,7 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                 {metadata.title || 'Untitled Page'}
               </h1>
               
-              {metadata.description && (
-                <p className="text-base text-gray-600 leading-relaxed mb-4">
-                  {metadata.description}
-                </p>
-              )}
+             
 
               <div className="flex items-center gap-4 flex-wrap">
                 {metadata.tags && metadata.tags.length > 0 && (
@@ -321,7 +317,13 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                 <p className="text-sm text-gray-400 mb-4">Select from gallery, drag & drop, or click to add</p>
               </div>
             )}
-          </div>
+            
+            {metadata.description && (
+                <p className="text-base text-gray-600 leading-relaxed mb-4 mt-4">
+                  {metadata.description}
+                </p>
+              )}    
+                    </div>
         </div>
 
         {/* Quick Actions Below Preview */}

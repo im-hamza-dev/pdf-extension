@@ -1,7 +1,7 @@
-import { jsPDF } from "jspdf";
+import { jsPDF } from 'jspdf';
 
 export async function exportPDF(images) {
-  const pdf = new jsPDF("p", "mm", "a4");
+  const pdf = new jsPDF('p', 'mm', 'a4');
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
 
@@ -16,10 +16,10 @@ export async function exportPDF(images) {
     const x = (pageW - w) / 2;
     const y = (pageH - h) / 2;
 
-    pdf.addImage(images[i], "PNG", x, y, w, h);
+    pdf.addImage(images[i], 'PNG', x, y, w, h);
   }
 
-  pdf.save("screenshots.pdf");
+  pdf.save('screenshots.pdf');
 }
 
 function measureImage(dataUrl) {
@@ -42,77 +42,263 @@ function mmToPx(mm) {
   return mm * 3.7795275591;
 }
 
-// Export PDF with custom layout
+// Export PDF with custom layout matching the preview
 export async function exportPDFWithLayout(pages, queue) {
-  const pdf = new jsPDF("p", "mm", "a4");
+  const pdf = new jsPDF('p', 'mm', 'a4');
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
-  const SCALE = 0.7; // Same scale used in editor
-  const PAGE_PADDING_MM = 20;
+
+  // Constants matching the preview
+  const PAGE_PADDING_MM = 12.7; // p-12 in Tailwind = 48px = 12.7mm at 96 DPI
+  const HEADER_MARGIN_BOTTOM_MM = 8; // mb-8 = 32px = 8.5mm
+  const MM_TO_PX = 3.7795275591;
+
+  // Spacing in mm (matching Tailwind: gap-2=8px, gap-4=16px, gap-6=24px)
+  const getSpacingMM = (spacing) => {
+    switch (spacing) {
+      case 'small':
+        return 2.1; // 8px
+      case 'large':
+        return 6.4; // 24px
+      default:
+        return 4.2; // 16px (medium)
+    }
+  };
 
   for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
     if (pageIndex > 0) pdf.addPage();
-    
-    const pageItems = pages[pageIndex];
-    
-    // Add page title if it's the first page
-    if (pageIndex === 0) {
-      pdf.setFontSize(16);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Screenshots Collection", PAGE_PADDING_MM, PAGE_PADDING_MM - 10);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.text(new Date().toLocaleDateString(), pageW - PAGE_PADDING_MM - 30, PAGE_PADDING_MM - 10);
+
+    const page = pages[pageIndex];
+    const { metadata, images, layoutSettings } = page;
+
+    // Debug: log page info
+    console.log(`Processing page ${pageIndex + 1}:`, {
+      imagesCount: images?.length || 0,
+      images: images?.map((img) => ({
+        hasImageUrl: !!img?.imageUrl,
+        hasUrl: !!img?.url,
+        hasDataUrl: !!img?.dataUrl,
+        imageId: img?.imageId,
+      })),
+    });
+
+    // Set background color
+    if (layoutSettings.background === 'light-gray') {
+      pdf.setFillColor(245, 246, 248);
+      pdf.rect(0, 0, pageW, pageH, 'F');
+    } else if (layoutSettings.background === 'gradient') {
+      // Simple gradient approximation
+      pdf.setFillColor(245, 246, 248);
+      pdf.rect(0, 0, pageW, pageH, 'F');
+    } else {
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, pageW, pageH, 'F');
     }
 
-    // Convert display coordinates to PDF coordinates (mm)
-    // Display uses: A4_WIDTH_PX = A4_WIDTH_MM * MM_TO_PX * SCALE
-    // So: display_px = (mm * MM_TO_PX * SCALE)
-    // Reverse: mm = display_px / (MM_TO_PX * SCALE)
-    const SCALE_FACTOR = 1 / (SCALE * 3.7795275591);
+    let currentY = PAGE_PADDING_MM;
 
-    for (const item of pageItems) {
-      // Convert item position and size from display pixels to mm
-      const x_mm = PAGE_PADDING_MM + item.x * SCALE_FACTOR;
-      const y_mm = PAGE_PADDING_MM + item.y * SCALE_FACTOR;
-      const w_mm = item.width * SCALE_FACTOR;
-      const h_mm = item.height * SCALE_FACTOR;
+    // Add header section (title, description, tags, date)
+    if (metadata.title) {
+      pdf.setFontSize(24); // text-3xl = 30px ≈ 8mm
+      pdf.setFont('helvetica', 'bold');
+      const titleLines = pdf.splitTextToSize(
+        metadata.title,
+        pageW - PAGE_PADDING_MM * 2
+      );
+      pdf.text(titleLines, PAGE_PADDING_MM, currentY);
+      currentY += titleLines.length * 8 + 3; // mb-3 = 12px = 3mm
+    }
 
-      // Add image
-      pdf.addImage(item.imageUrl, "PNG", x_mm, y_mm, w_mm, h_mm);
+    // Tags and date on same line
+    if ((metadata.tags && metadata.tags.length > 0) || metadata.date) {
+      let tagDateX = PAGE_PADDING_MM;
 
-      // Add title if present
-      if (item.title) {
-        pdf.setFontSize(12);
-        pdf.setFont("helvetica", "bold");
-        const titleY = y_mm + h_mm + 5;
-        if (titleY < pageH - PAGE_PADDING_MM) {
-          pdf.text(item.title, x_mm, titleY);
-        }
+      // Add tags
+      let tagDateY = currentY;
+      if (metadata.tags && metadata.tags.length > 0) {
+        pdf.setFontSize(10); // text-sm = 14px ≈ 3.7mm
+        pdf.setFillColor(90, 83, 135); // #5a5387
+        metadata.tags.forEach((tag, idx) => {
+          const tagTextWidth = pdf.getTextWidth(tag);
+          const tagPadding = 3; // px-3 = 12px = 3.2mm padding
+          const tagWidth = tagTextWidth + tagPadding * 2;
+          const tagHeight = 5; // Height for tag background
+          if (tagDateX + tagWidth > pageW - PAGE_PADDING_MM) {
+            tagDateX = PAGE_PADDING_MM;
+            tagDateY += 6;
+          }
+          // Draw tag background
+          pdf.rect(
+            tagDateX,
+            tagDateY - tagHeight + 1,
+            tagWidth,
+            tagHeight,
+            'F'
+          );
+          pdf.setTextColor(255, 255, 255);
+          pdf.text(tag, tagDateX + tagPadding, tagDateY);
+          tagDateX += tagWidth + 2.1; // gap-2 = 8px = 2.1mm
+        });
+        pdf.setTextColor(0, 0, 0);
+        tagDateX += 4.2; // gap-4 = 16px = 4.2mm
       }
 
-      // Add description if present
-      if (item.description) {
+      // Add date
+      if (metadata.date) {
         pdf.setFontSize(10);
-        pdf.setFont("helvetica", "normal");
-        const descY = y_mm + h_mm + (item.title ? 10 : 5);
-        if (descY < pageH - PAGE_PADDING_MM) {
-          const lines = pdf.splitTextToSize(item.description, w_mm);
-          pdf.text(lines, x_mm, descY);
-        }
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(107, 114, 128); // text-gray-500
+        const dateStr = new Date(metadata.date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        pdf.text(dateStr, tagDateX, tagDateY);
+        pdf.setTextColor(0, 0, 0);
       }
 
-      // Add tags if present
-      if (item.tags) {
-        pdf.setFontSize(8);
-        pdf.setFont("helvetica", "italic");
-        const tagsY = y_mm + h_mm + (item.description ? 20 : item.title ? 15 : 10);
-        if (tagsY < pageH - PAGE_PADDING_MM) {
-          pdf.text(`Tags: ${item.tags}`, x_mm, tagsY);
-        }
+      // Update currentY based on tag/date height
+      if (tagDateY > currentY) {
+        currentY = tagDateY;
       }
+
+      currentY += HEADER_MARGIN_BOTTOM_MM;
+    } else {
+      currentY += HEADER_MARGIN_BOTTOM_MM;
+    }
+
+    // Calculate grid layout for images
+    const availableWidth = pageW - PAGE_PADDING_MM * 2;
+    const availableHeight = pageH - currentY - PAGE_PADDING_MM;
+    const spacingMM = getSpacingMM(layoutSettings.spacing);
+
+    let cols, rows;
+    switch (layoutSettings.layout) {
+      case 'single':
+        cols = 1;
+        rows = 1;
+        break;
+      case 'two-column':
+        cols = 2;
+        rows = Math.ceil(images.length / 2);
+        break;
+      case 'three-grid':
+        cols = 3;
+        rows = Math.ceil(images.length / 3);
+        break;
+      case 'four-grid':
+        cols = 2;
+        rows = Math.ceil(images.length / 2);
+        break;
+      default:
+        cols = 1;
+        rows = 1;
+    }
+
+    // Calculate image dimensions based on grid
+    const totalSpacingWidth = spacingMM * (cols - 1);
+    const totalSpacingHeight = spacingMM * (rows - 1);
+    const imageWidth = (availableWidth - totalSpacingWidth) / cols;
+    const imageHeight = imageWidth / (16 / 10); // 16:10 aspect ratio
+
+    // If images are too tall, adjust
+    const maxImageHeight = (availableHeight - totalSpacingHeight) / rows;
+    let finalImageHeight = Math.min(imageHeight, maxImageHeight);
+    let finalImageWidth = finalImageHeight * (16 / 10);
+
+    // Recalculate if width doesn't fit
+    if (finalImageWidth * cols + totalSpacingWidth > availableWidth) {
+      finalImageWidth = (availableWidth - totalSpacingWidth) / cols;
+      finalImageHeight = finalImageWidth / (16 / 10);
+    }
+
+    // Add images in grid - use Promise.all to wait for all images
+    await Promise.all(
+      images.map(async (image, index) => {
+        // Check for image with any URL property
+        const imageUrl = image?.imageUrl || image?.url || image?.dataUrl;
+        if (!image || !imageUrl) {
+          console.warn(
+            `Skipping image at index ${index}: no valid URL found`,
+            image
+          );
+          return;
+        }
+
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+
+        const x = PAGE_PADDING_MM + col * (finalImageWidth + spacingMM);
+        const y = currentY + row * (finalImageHeight + spacingMM);
+
+        try {
+          // Load and add image
+          const img = await new Promise((resolve, reject) => {
+            const imgEl = new Image();
+            imgEl.onload = () => resolve(imgEl);
+            imgEl.onerror = (err) => {
+              console.error(
+                `Failed to load image at index ${index}:`,
+                imageUrl,
+                err
+              );
+              reject(err);
+            };
+            imgEl.src = imageUrl;
+          });
+
+          // Calculate actual dimensions maintaining aspect ratio
+          const imgAspectRatio = img.width / img.height;
+          const slotAspectRatio = 16 / 10;
+
+          let w, h;
+          if (imgAspectRatio > slotAspectRatio) {
+            // Image is wider - fit to width
+            w = finalImageWidth;
+            h = finalImageWidth / imgAspectRatio;
+            if (h > finalImageHeight) {
+              h = finalImageHeight;
+              w = finalImageHeight * imgAspectRatio;
+            }
+          } else {
+            // Image is taller - fit to height
+            h = finalImageHeight;
+            w = finalImageHeight * imgAspectRatio;
+            if (w > finalImageWidth) {
+              w = finalImageWidth;
+              h = finalImageWidth / imgAspectRatio;
+            }
+          }
+
+          // Center image in slot
+          const slotX = x + (finalImageWidth - w) / 2;
+          const slotY = y + (finalImageHeight - h) / 2;
+
+          pdf.addImage(imageUrl, 'PNG', slotX, slotY, w, h);
+        } catch (error) {
+          console.error(`Error adding image at index ${index}:`, error);
+          // Continue with other images even if one fails
+        }
+      })
+    );
+
+    // Move cursor BELOW the image grid before adding description
+    const gridHeight = rows * finalImageHeight + totalSpacingHeight;
+    currentY += gridHeight;
+    // Add a little margin below images (similar to mt-4)
+    currentY += 4.2;
+
+    if (metadata.description) {
+      pdf.setFontSize(16); // text-base = 16px ≈ 4.2mm
+      pdf.setFont('helvetica', 'normal');
+      const descLines = pdf.splitTextToSize(
+        metadata.description,
+        pageW - PAGE_PADDING_MM * 2
+      );
+      pdf.text(descLines, PAGE_PADDING_MM, currentY);
+      currentY += descLines.length * 4.2 + 4.2; // line height + margin
     }
   }
 
-  pdf.save("screenshots-layout.pdf");
+  pdf.save('screenshots-layout.pdf');
 }

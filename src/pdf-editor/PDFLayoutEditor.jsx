@@ -281,38 +281,8 @@ function PDFLayoutEditor() {
 
   async function handleExportPDF() {
     try {
-      // Convert new format to old format for export
-      // We need to calculate positions for each image based on layout
-      const exportPages = await Promise.all(pages.map(async (page) => {
-        const pageItems = await Promise.all(page.images.map(async (image, index) => {
-          // Load image to get dimensions
-          const img = await new Promise((resolve, reject) => {
-            const imgEl = new Image();
-            imgEl.onload = () => resolve(imgEl);
-            imgEl.onerror = reject;
-            imgEl.src = image.imageUrl || image.url || image.dataUrl;
-          });
-
-          // Calculate position based on layout
-          const layoutItem = await createLayoutItem(
-            { id: image.imageId, dataUrl: image.imageUrl || image.url || image.dataUrl },
-            index,
-            page.layoutSettings.layout,
-            page.images.length
-          );
-
-          return {
-            ...layoutItem,
-            imageUrl: image.imageUrl || image.url || image.dataUrl,
-            title: page.metadata.title,
-            description: page.metadata.description,
-            tags: page.metadata.tags && page.metadata.tags.length > 0 ? page.metadata.tags.join(', ') : '',
-          };
-        }));
-        return pageItems;
-      }));
-      
-      await exportPDFWithLayout(exportPages, queue);
+      // Pass pages directly - export function now handles the layout matching the preview
+      await exportPDFWithLayout(pages, queue);
       // Close the tab after export
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs && tabs[0]) {
