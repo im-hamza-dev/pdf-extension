@@ -178,6 +178,10 @@ export async function exportPDFWithLayout(pages, queue) {
         cols = 1;
         rows = 1;
         break;
+      case 'two-row':
+        cols = 1;
+        rows = 2;
+        break;
       case 'two-column':
         cols = 2;
         rows = Math.ceil(images.length / 2);

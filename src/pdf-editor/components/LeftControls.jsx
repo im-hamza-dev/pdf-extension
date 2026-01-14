@@ -44,8 +44,15 @@ const Grid2x2Icon = ({ className }) => (
   </svg>
 );
 
+const RowsIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 17h16M4 11h16M4 13h16" />
+  </svg>
+);
+
 const layoutOptions = [
   { type: LAYOUT_TYPES.SINGLE, icon: SquareIcon, label: 'Single', description: '1 image' },
+  { type: LAYOUT_TYPES.TWO_ROW, icon: RowsIcon, label: '2 Rows', description: '2 images' },
   { type: LAYOUT_TYPES.TWO_COLUMN, icon: ColumnsIcon, label: 'Two Column', description: '2 images' },
   { type: LAYOUT_TYPES.THREE_GRID, icon: Grid3x3Icon, label: 'Three Grid', description: '3 images' },
   { type: LAYOUT_TYPES.FOUR_GRID, icon: Grid2x2Icon, label: '2×2 Grid', description: '4 images' },

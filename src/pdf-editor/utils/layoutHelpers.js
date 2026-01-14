@@ -114,6 +114,8 @@ export function getGridClass(layoutType) {
   switch (layoutType) {
     case LAYOUT_TYPES.SINGLE:
       return 'grid-cols-1';
+    case LAYOUT_TYPES.TWO_ROW:
+      return 'grid-cols-1';
     case LAYOUT_TYPES.TWO_COLUMN:
       return 'grid-cols-2';
     case LAYOUT_TYPES.THREE_GRID:

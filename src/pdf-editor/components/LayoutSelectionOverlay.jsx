@@ -26,6 +26,18 @@ const layoutOptions = [
     ),
   },
   {
+    type: LAYOUT_TYPES.TWO_ROW,
+    name: 'Two Rows (Stacked)',
+    description: 'Two images stacked vertically',
+    imageCount: '2 images',
+    preview: (
+      <div className="w-full h-full p-2 grid grid-rows-2 gap-1">
+        <div className="bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="bg-gradient-to-br from-[#5a5387] to-[#574269] rounded"></div>
+      </div>
+    ),
+  },
+  {
     type: LAYOUT_TYPES.TWO_COLUMN,
     name: 'Two Column',
     description: 'Two images displayed side by side',

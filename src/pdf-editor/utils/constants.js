@@ -13,7 +13,8 @@ export const LAYOUT_TYPES = {
   SINGLE: 'single',
   TWO_COLUMN: 'two-column',
   THREE_GRID: 'three-grid',
-  FOUR_GRID: 'four-grid'
+  FOUR_GRID: 'four-grid',
+  TWO_ROW: 'two-row',
 };
 
 // Spacing types

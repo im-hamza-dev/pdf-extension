@@ -26,6 +26,12 @@ const Grid2x2Icon = ({ className }) => (
   </svg>
 );
 
+const RowsIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 17h16M4 11h16M4 13h16" />
+  </svg>
+);
+
 const PaletteIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -34,6 +40,7 @@ const PaletteIcon = ({ className }) => (
 
 const layoutOptions = [
   { type: LAYOUT_TYPES.SINGLE, icon: SquareIcon, label: 'Single' },
+  { type: LAYOUT_TYPES.TWO_ROW, icon: RowsIcon, label: '2 Rows' },
   { type: LAYOUT_TYPES.TWO_COLUMN, icon: ColumnsIcon, label: 'Two Column' },
   { type: LAYOUT_TYPES.THREE_GRID, icon: Grid3x3Icon, label: 'Three Grid' },
   { type: LAYOUT_TYPES.FOUR_GRID, icon: Grid2x2Icon, label: '2×2 Grid' },

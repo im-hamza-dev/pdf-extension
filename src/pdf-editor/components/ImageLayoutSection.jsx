@@ -107,9 +107,11 @@ export function ImageLayoutSection({
     }
   };
 
-  const maxImages = layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-                   layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-                   layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+  const maxImages =
+    layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+    layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+    layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+    layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">

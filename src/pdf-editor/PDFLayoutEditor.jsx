@@ -129,9 +129,11 @@ function PDFLayoutEditor() {
 
   const handleImagesChange = async (newImages) => {
     // If layout changed, we might need to adjust images
-    const maxImages = currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-                     currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-                     currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+    const maxImages =
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     // Limit images to max for current layout
     const limitedImages = newImages.slice(0, maxImages);
@@ -139,13 +141,17 @@ function PDFLayoutEditor() {
   };
 
   const handleLayoutSettingsChange = async (newLayoutSettings) => {
-    const oldMaxImages = currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-                        currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-                        currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+    const oldMaxImages =
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
     
-    const newMaxImages = newLayoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-                         newLayoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-                         newLayoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+    const newMaxImages =
+      newLayoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+      newLayoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+      newLayoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+      newLayoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     // If reducing max images, trim the images array
     let images = currentPage.images;
@@ -185,9 +191,11 @@ function PDFLayoutEditor() {
   };
 
   const handleAddImage = async (image) => {
-    const maxImages = currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-                     currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-                     currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+    const maxImages =
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     if (currentPage.images.length >= maxImages) {
       alert(`Maximum ${maxImages} images allowed for this layout. Please change layout or remove an image first.`);
@@ -213,9 +221,11 @@ function PDFLayoutEditor() {
       return;
     }
 
-    const maxImages = currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-                     currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-                     currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+    const maxImages =
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     // Check if we have a pending replace operation
     const targetSlot = pendingReplaceSlot !== null ? pendingReplaceSlot : (slotIndex !== null ? slotIndex : null);

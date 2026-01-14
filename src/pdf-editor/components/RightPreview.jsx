@@ -35,6 +35,7 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
   const getMaxImages = () => {
     switch (layoutSettings.layout) {
       case LAYOUT_TYPES.SINGLE: return 1;
+      case LAYOUT_TYPES.TWO_ROW: return 2;
       case LAYOUT_TYPES.TWO_COLUMN: return 2;
       case LAYOUT_TYPES.THREE_GRID: return 3;
       case LAYOUT_TYPES.FOUR_GRID: return 4;
