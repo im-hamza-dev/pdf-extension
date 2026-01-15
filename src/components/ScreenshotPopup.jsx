@@ -51,6 +51,7 @@ export function ScreenshotPopup({
   isPopupContext = false,
 }) {
   const [hoveredId, setHoveredId] = useState(null);
+  const [logoError, setLogoError] = useState(false);
 
   const formatTime = (date) => {
     return date.toLocaleTimeString('en-US', { 
@@ -81,11 +82,20 @@ export function ScreenshotPopup({
       <div className="px-6 py-5 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#4974a7" }}>
-              <Camera className="w-5 h-5 text-white" />
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ${logoError ? 'bg-[#4974a7]' : ''}`}>
+              {logoError ? (
+                <Camera className="w-5 h-5 text-white" />
+              ) : (
+                <img 
+                  src={chrome.runtime.getURL('snap-doc.png')} 
+                  alt="SnapDoc Logo" 
+                  className="w-full h-full object-contain"
+                  onError={() => setLogoError(true)}
+                />
+              )}
             </div>
             <div>
-              <h2 className="text-xl text-gray-900">Screenshot Manager</h2>
+              <h2 className="text-xl text-gray-900">SnapDoc</h2>
               <p className="text-sm text-gray-500">
                 {screenshots.length} {screenshots.length === 1 ? 'screenshot' : 'screenshots'} captured
               </p>
@@ -217,14 +227,15 @@ export function ScreenshotPopup({
   if (isPopupContext) {
     return (
       <div 
-        className="bg-white w-full h-full flex flex-col overflow-hidden"
+        className="bg-white w-full h-full flex flex-col overflow-hidden rounded-lg"
         style={{ 
           backgroundColor: 'white', 
           width: '100%', 
           height: '100%', 
           display: 'flex', 
           flexDirection: 'column', 
-          overflow: 'hidden' 
+          overflow: 'hidden',
+          borderRadius: '10px'
         }}
       >
         {content}

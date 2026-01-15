@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
-import { copyFileSync, mkdirSync } from "fs";
+import { copyFileSync, mkdirSync, existsSync } from "fs";
 
 // Plugin to copy static files to dist
 function copyStaticFiles() {
@@ -14,8 +14,12 @@ function copyStaticFiles() {
       // Copy background.js
       copyFileSync("background.js", "dist/background.js");
 
-      // Copy icon
-      copyFileSync("icon01.jpg", "dist/icon01.jpg");
+      // Copy icons
+      copyFileSync("snap-doc.png", "dist/snap-doc.png");
+      // Keep old icon for backward compatibility if needed
+      if (existsSync("icon01.jpg")) {
+        copyFileSync("icon01.jpg", "dist/icon01.jpg");
+      }
     },
   };
 }

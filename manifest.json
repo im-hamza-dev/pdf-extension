@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Screenshot → PDF (Live Builder)",
+  "name": "SnapDoc",
   "version": "1.0.0",
-  "description": "Capture screenshots, queue them as pages, and export a multi-page PDF.",
+  "description": "Turn Screenshots into Documents",
   "permissions": ["tabs", "activeTab", "storage", "downloads"],
   "action": {
-    "default_title": "Screenshot → PDF",
+    "default_title": "SnapDoc - Turn Screenshots into Documents",
     "default_popup": "src/popup/index.html"
   },
   "background": {
@@ -13,9 +13,9 @@
     "type": "module"
   },
   "icons": {
-    "16": "icon01.jpg",
-    "32": "icon01.jpg",
-    "128": "icon01.jpg"
+    "16": "snap-doc.png",
+    "32": "snap-doc.png",
+    "128": "snap-doc.png"
   },
   "commands": {
     "capture-screenshot": {

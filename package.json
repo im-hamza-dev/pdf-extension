@@ -1,7 +1,7 @@
 {
-  "name": "pdf-extension",
+  "name": "snapdoc",
   "version": "1.0.0",
-  "description": "Screenshot → PDF Chrome Extension with React",
+  "description": "SnapDoc - Turn Screenshots into Documents",
   "type": "module",
   "scripts": {
     "dev": "vite build --watch --mode development",

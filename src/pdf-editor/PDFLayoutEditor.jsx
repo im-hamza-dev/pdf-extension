@@ -16,6 +16,7 @@ function PDFLayoutEditor() {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pendingReplaceSlot, setPendingReplaceSlot] = useState(null);
   const [showScreenshotPopup, setShowScreenshotPopup] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     loadQueue();
@@ -368,12 +369,21 @@ function PDFLayoutEditor() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-[#4974a7] flex items-center justify-center">
-                <span className="text-white font-semibold">PDF</span>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ${logoError ? 'bg-[#4974a7]' : ''}`}>
+                {logoError ? (
+                  <span className="text-white font-semibold">SD</span>
+                ) : (
+                  <img 
+                    src={chrome.runtime.getURL('snap-doc.png')} 
+                    alt="SnapDoc Logo" 
+                    className="w-full h-full object-contain"
+                    onError={() => setLogoError(true)}
+                  />
+                )}
               </div>
               <div>
-                <h1 className="text-xl text-gray-900">PDF Page Layout Editor</h1>
-                <p className="text-sm text-gray-500">Design professional report pages</p>
+                <h1 className="text-xl text-gray-900">SnapDoc</h1>
+                <p className="text-sm text-gray-500">Turn Screenshots into Documents</p>
               </div>
             </div>
             
@@ -388,12 +398,12 @@ function PDFLayoutEditor() {
                 </svg>
                 Screenshots
               </button>
-              <button
+              {/* <button
                 onClick={handleSaveDraft}
                 className="px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Save Draft
-              </button>
+              </button> */}
               <button
                 onClick={handleExportPDF}
                 className="px-6 py-2 text-sm rounded-lg text-white transition-colors shadow-sm"
