@@ -39,3 +39,27 @@ body {
   pointer-events: auto !important;
   cursor: pointer !important;
 }
+
+/* Hide load and download buttons */
+.tui-image-editor-load-btn,
+.tui-image-editor-download-btn,
+button[class*="load"],
+button[class*="Load"],
+button[class*="download"],
+button[class*="Download"],
+.tui-image-editor-header button[type="button"]:first-child,
+.tui-image-editor-controls button[type="button"]:first-child,
+/* More specific selectors for tui-image-editor buttons */
+.tui-image-editor-container .tui-image-editor-header .tui-image-editor-load-btn,
+.tui-image-editor-container .tui-image-editor-header .tui-image-editor-download-btn,
+.tui-image-editor-container .tui-image-editor-controls .tui-image-editor-load-btn,
+.tui-image-editor-container .tui-image-editor-controls .tui-image-editor-download-btn {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+}

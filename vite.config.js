@@ -5,21 +5,50 @@ import { copyFileSync, mkdirSync, existsSync } from 'fs';
 
 // Plugin to copy static files to dist
 function copyStaticFiles() {
-  return {
-    name: 'copy-static-files',
-    closeBundle() {
+  const copyFiles = () => {
+    try {
       // Copy manifest.json
-      copyFileSync('manifest.json', 'dist/manifest.json');
+      if (existsSync('manifest.json')) {
+        copyFileSync('manifest.json', 'dist/manifest.json');
+        console.log('✓ Copied manifest.json');
+      }
 
       // Copy background.js
-      copyFileSync('background.js', 'dist/background.js');
+      if (existsSync('background.js')) {
+        copyFileSync('background.js', 'dist/background.js');
+        console.log('✓ Copied background.js');
+      }
 
       // Copy icons
-      copyFileSync('snap-doc.png', 'dist/snap-doc.png');
+      if (existsSync('snap-doc.png')) {
+        copyFileSync('snap-doc.png', 'dist/snap-doc.png');
+        console.log('✓ Copied snap-doc.png');
+      } else {
+        console.warn('⚠ snap-doc.png not found in project root');
+      }
+
       // Keep old icon for backward compatibility if needed
       if (existsSync('icon01.jpg')) {
         copyFileSync('icon01.jpg', 'dist/icon01.jpg');
+        console.log('✓ Copied icon01.jpg');
       }
+    } catch (error) {
+      console.error('Error copying static files:', error);
+    }
+  };
+
+  return {
+    name: 'copy-static-files',
+    buildEnd() {
+      copyFiles();
+    },
+    writeBundle() {
+      // Also run after bundle is written as a fallback
+      copyFiles();
+    },
+    closeBundle() {
+      // Final fallback - ensure files are copied
+      copyFiles();
     },
   };
 }
