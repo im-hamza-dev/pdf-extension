@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ScreenshotList from '../components/ScreenshotList';
-import { exportPDF } from '../utils/pdfExport';
+import { ScreenshotPopup } from '../components/ScreenshotPopup';
 import { sendMessage } from '../utils/chromeApi';
 
 function App() {
@@ -30,6 +29,14 @@ function App() {
     }
   }
 
+  // Convert queue items to Screenshot format
+  const screenshots = queue.map((item) => ({
+    id: item.id,
+    url: item.dataUrl,
+    timestamp: item.createdAt ? new Date(item.createdAt) : new Date(),
+    thumbnail: item.dataUrl, // Use dataUrl as thumbnail
+  }));
+
   async function handleCapture() {
     await sendMessage({ type: 'CAPTURE' });
     await refresh();
@@ -49,60 +56,40 @@ function App() {
     await sendMessage({ type: 'OPEN_PDF_EDITOR' });
   }
 
-  async function handleQuickExport() {
-    if (!queue || queue.length === 0) {
-      alert('No pages yet. Capture something first.');
-      return;
-    }
-    // Quick export without layout editor (old behavior)
-    const images = queue.map((q) => q.dataUrl);
-    await exportPDF(images);
+  async function handleSave(screenshot) {
+    await sendMessage({ type: 'SAVE_PNG', dataUrl: screenshot.url });
   }
 
-  async function handleRemove(id) {
+  async function handleDelete(id) {
     const { ok } = await sendMessage({ type: 'REMOVE', id });
     if (ok) {
       await refresh();
     }
   }
 
-  async function handleSavePng(dataUrl) {
-    await sendMessage({ type: 'SAVE_PNG', dataUrl });
-  }
-
-  async function handleReorder(order) {
-    await sendMessage({ type: 'REORDER', order });
-  }
-
-  async function handleEdit(id) {
-    await sendMessage({ type: 'EDIT_IMAGE', id });
+  async function handleEdit(screenshot) {
+    await sendMessage({ type: 'EDIT_IMAGE', id: screenshot.id });
     // Don't need to refresh immediately - the edit will update the item
     // The queue will refresh when the user saves from the editor
   }
 
-  return (
-    <div>
-      <div className="row">
-        <button className="primary" onClick={handleCapture}>
-          📸 Capture
-        </button>
-        <button className="secondary" onClick={handleExport}>
-          📄 Layout & Export PDF
-        </button>
-        <button className="secondary" onClick={handleQuickExport} title="Quick export without layout editor">
-          ⚡ Quick Export
-        </button>
-        <button className="danger" onClick={handleClear}>
-          🗑️ Clear
-        </button>
-      </div>
+  // For popup, we don't need a close handler since it's always visible
+  const handleClose = () => {
+    // In popup context, we can't close it, but this is here for consistency
+  };
 
-      <ScreenshotList
-        queue={queue}
-        onRemove={handleRemove}
-        onSavePng={handleSavePng}
-        onReorder={handleReorder}
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <ScreenshotPopup
+        screenshots={screenshots}
+        onClose={handleClose}
+        onCapture={handleCapture}
         onEdit={handleEdit}
+        onSave={handleSave}
+        onDelete={handleDelete}
+        onExportToLayout={handleExport}
+        onClearAll={handleClear}
+        isPopupContext={true}
       />
     </div>
   );

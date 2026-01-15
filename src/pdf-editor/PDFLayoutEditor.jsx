@@ -5,6 +5,7 @@ import { LeftControls } from './components/LeftControls';
 import { RightPreview } from './components/RightPreview';
 import { PageNavigation } from './components/PageNavigation';
 import { ImageGallery } from './components/ImageGallery';
+import { ScreenshotPopup } from '../components/ScreenshotPopup';
 import { createLayoutItem } from './utils/layoutHelpers';
 import { LAYOUT_TYPES } from './utils/constants';
 
@@ -14,6 +15,7 @@ function PDFLayoutEditor() {
   const [pages, setPages] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pendingReplaceSlot, setPendingReplaceSlot] = useState(null);
+  const [showScreenshotPopup, setShowScreenshotPopup] = useState(false);
 
   useEffect(() => {
     loadQueue();
@@ -310,6 +312,46 @@ function PDFLayoutEditor() {
     alert('Draft saved!');
   };
 
+  // Convert queue items to Screenshot format for popup
+  const screenshots = queue.map((item) => ({
+    id: item.id,
+    url: item.dataUrl,
+    timestamp: item.createdAt ? new Date(item.createdAt) : new Date(),
+    thumbnail: item.dataUrl,
+  }));
+
+  async function handleScreenshotCapture() {
+    await sendMessage({ type: 'CAPTURE' });
+    await loadQueue();
+  }
+
+  async function handleScreenshotClear() {
+    await sendMessage({ type: 'CLEAR' });
+    await loadQueue();
+  }
+
+  async function handleScreenshotSave(screenshot) {
+    await sendMessage({ type: 'SAVE_PNG', dataUrl: screenshot.url });
+  }
+
+  async function handleScreenshotDelete(id) {
+    const { ok } = await sendMessage({ type: 'REMOVE', id });
+    if (ok) {
+      await loadQueue();
+    }
+  }
+
+  async function handleScreenshotEdit(screenshot) {
+    await sendMessage({ type: 'EDIT_IMAGE', id: screenshot.id });
+    // Queue will refresh when user saves from editor
+  }
+
+  async function handleScreenshotExportToLayout() {
+    setShowScreenshotPopup(false);
+    // Already in layout editor, just refresh the queue
+    await loadQueue();
+  }
+
   // Combine screenshots and local images
   const allAvailableImages = [...queue, ...localImages];
   
@@ -336,6 +378,16 @@ function PDFLayoutEditor() {
             </div>
             
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowScreenshotPopup(true)}
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Screenshots
+              </button>
               <button
                 onClick={handleSaveDraft}
                 className="px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
@@ -402,6 +454,21 @@ function PDFLayoutEditor() {
         onAddPage={handleAddPage}
         onDeletePage={handleDeletePage}
       />
+
+      {/* Screenshot Popup Modal */}
+      {showScreenshotPopup && (
+        <ScreenshotPopup
+          screenshots={screenshots}
+          onClose={() => setShowScreenshotPopup(false)}
+          onCapture={handleScreenshotCapture}
+          onEdit={handleScreenshotEdit}
+          onSave={handleScreenshotSave}
+          onDelete={handleScreenshotDelete}
+          onExportToLayout={handleScreenshotExportToLayout}
+          onClearAll={handleScreenshotClear}
+          isPopupContext={false}
+        />
+      )}
     </div>
   );
 }
