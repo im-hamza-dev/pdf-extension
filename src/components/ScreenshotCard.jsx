@@ -65,7 +65,7 @@ export function ScreenshotCard({
 
   return (
     <div
-      className="group relative bg-white border-2 border-gray-200 rounded-xl hover:border-[#4974a7] hover:shadow-lg transition-all overflow-hidden"
+      className="group relative bg-white border-2 border-gray-200 rounded-xl hover:border-[#588AE8] hover:shadow-lg transition-all overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -74,7 +74,7 @@ export function ScreenshotCard({
         <div className="relative flex-shrink-0">
           <button
             onClick={onPreview}
-            className="w-32 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hover:border-[#4974a7] transition-all group/preview"
+            className="w-32 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hover:border-[#588AE8] transition-all group/preview"
           >
             <img
               src={screenshot.thumbnail || screenshot.url}
@@ -91,7 +91,7 @@ export function ScreenshotCard({
           {/* Screenshot Number Badge */}
           <div 
             className="absolute -top-2 -left-2 w-7 h-7 rounded-full text-white flex items-center justify-center text-xs font-semibold shadow-md"
-            style={{ backgroundColor: "#4974a7" }}
+            style={{ backgroundColor: "#588AE8" }}
           >
             {index + 1}
           </div>

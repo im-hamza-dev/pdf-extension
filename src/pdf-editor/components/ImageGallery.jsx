@@ -108,7 +108,7 @@ export function ImageGallery({
             : 'Click to select or drag & drop'}
         </p>
         {pendingReplaceSlot !== null && (
-          <div className="mt-2 px-3 py-2 bg-[#4974a7]/10 border border-[#4974a7] rounded text-xs text-[#4974a7]">
+          <div className="mt-2 px-3 py-2 bg-[#588AE8]/10 border border-[#588AE8] rounded text-xs text-[#588AE8]">
             Replace mode active - click an image to replace slot {pendingReplaceSlot + 1}
           </div>
         )}
@@ -118,7 +118,7 @@ export function ImageGallery({
       <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <button
           onClick={handleUploadClick}
-          className="w-full px-4 py-3 bg-[#4974a7] text-white rounded-lg hover:bg-[#3d6290] transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+          className="w-full px-4 py-3 bg-[#588AE8] text-white rounded-lg hover:bg-[#3d6290] transition-colors flex items-center justify-center gap-2 text-sm font-medium"
         >
           <UploadIcon className="w-4 h-4" />
           Upload from Storage
@@ -135,10 +135,10 @@ export function ImageGallery({
 
       {/* Drag & Drop Zone */}
       {isDragging && (
-        <div className="absolute inset-0 bg-[#4974a7]/10 border-2 border-dashed border-[#4974a7] z-50 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 bg-[#588AE8]/10 border-2 border-dashed border-[#588AE8] z-50 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <UploadIcon className="w-12 h-12 text-[#4974a7] mx-auto mb-2" />
-            <p className="text-[#4974a7] font-medium">Drop images here</p>
+            <UploadIcon className="w-12 h-12 text-[#588AE8] mx-auto mb-2" />
+            <p className="text-[#588AE8] font-medium">Drop images here</p>
           </div>
         </div>
       )}
@@ -162,8 +162,8 @@ export function ImageGallery({
                   className={`
                     relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all
                     ${isSelected 
-                      ? 'border-[#4974a7] ring-2 ring-[#4974a7]/20' 
-                      : 'border-gray-200 hover:border-[#4974a7]/50'
+                      ? 'border-[#588AE8] ring-2 ring-[#588AE8]/20' 
+                      : 'border-gray-200 hover:border-[#588AE8]/50'
                     }
                   `}
                 >
@@ -174,8 +174,8 @@ export function ImageGallery({
                       className="w-full h-full object-cover"
                     />
                     {isSelected && (
-                      <div className="absolute inset-0 bg-[#4974a7]/20 flex items-center justify-center">
-                        <div className="bg-[#4974a7] text-white rounded-full w-8 h-8 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-[#588AE8]/20 flex items-center justify-center">
+                        <div className="bg-[#588AE8] text-white rounded-full w-8 h-8 flex items-center justify-center">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>

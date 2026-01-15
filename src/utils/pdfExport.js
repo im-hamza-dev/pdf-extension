@@ -15,7 +15,12 @@ const MAX_DPI = 300; // Maximum DPI for PDF images (300 DPI is print quality)
  * @param {number} quality - JPEG quality (0.0 to 1.0)
  * @returns {Promise<string>} Optimized image data URL (JPEG format)
  */
-async function optimizeImage(dataUrl, maxWidth = MAX_IMAGE_DIMENSION, maxHeight = MAX_IMAGE_DIMENSION, quality = JPEG_QUALITY) {
+async function optimizeImage(
+  dataUrl,
+  maxWidth = MAX_IMAGE_DIMENSION,
+  maxHeight = MAX_IMAGE_DIMENSION,
+  quality = JPEG_QUALITY
+) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -92,7 +97,7 @@ export async function exportPDF(images) {
 
   for (let i = 0; i < images.length; i++) {
     if (i > 0) pdf.addPage();
-    
+
     // Optimize image before adding
     const optimizedImage = await getOptimizedImage(images[i]);
     const { width, height } = await measureImage(optimizedImage);
@@ -327,7 +332,7 @@ export async function exportPDFWithLayout(pages, queue) {
         try {
           // Optimize image before adding
           const optimizedImage = await getOptimizedImage(imageUrl);
-          
+
           // Load optimized image to get dimensions
           const img = await new Promise((resolve, reject) => {
             const imgEl = new Image();

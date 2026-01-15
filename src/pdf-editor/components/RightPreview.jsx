@@ -164,10 +164,10 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
       onDrop={(e) => handleDrop(e, null)}
     >
       {isDraggingOver && (
-        <div className="absolute inset-0 bg-[#4974a7]/10 border-2 border-dashed border-[#4974a7] z-50 flex items-center justify-center pointer-events-none rounded-lg">
+        <div className="absolute inset-0 bg-[#588AE8]/10 border-2 border-dashed border-[#588AE8] z-50 flex items-center justify-center pointer-events-none rounded-lg">
           <div className="text-center">
-            <UploadIcon className="w-12 h-12 text-[#4974a7] mx-auto mb-2" />
-            <p className="text-[#4974a7] font-medium">Drop image here</p>
+            <UploadIcon className="w-12 h-12 text-[#588AE8] mx-auto mb-2" />
+            <p className="text-[#588AE8] font-medium">Drop image here</p>
           </div>
         </div>
       )}
@@ -229,13 +229,13 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                   className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all ${
                     image 
                       ? pendingReplaceSlot === index
-                        ? 'border-[#4974a7] ring-2 ring-[#4974a7]/30'
-                        : 'border-gray-300 hover:border-[#4974a7]' 
+                        ? 'border-[#588AE8] ring-2 ring-[#588AE8]/30'
+                        : 'border-gray-300 hover:border-[#588AE8]' 
                       : draggedSlotIndex === index
-                      ? 'border-[#4974a7] bg-[#4974a7]/5'
+                      ? 'border-[#588AE8] bg-[#588AE8]/5'
                       : pendingReplaceSlot === index
-                      ? 'border-[#4974a7] bg-[#4974a7]/5'
-                      : 'border-gray-300 hover:border-[#4974a7]'
+                      ? 'border-[#588AE8] bg-[#588AE8]/5'
+                      : 'border-gray-300 hover:border-[#588AE8]'
                   }`}
                   style={{ aspectRatio: '16/10' }}
                   onDragOver={(e) => {
@@ -275,7 +275,7 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                           }}
                           className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${
                             pendingReplaceSlot === index 
-                              ? 'bg-[#4974a7] text-white hover:bg-[#3d6290]' 
+                              ? 'bg-[#588AE8] text-white hover:bg-[#3d6290]' 
                               : 'bg-white text-gray-900'
                           }`}
                           title={pendingReplaceSlot === index ? "Click an image from the gallery to replace" : "Click to replace this image"}
@@ -296,8 +296,8 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#4974a7] hover:bg-[#4974a7]/5 transition-all cursor-pointer">
-                      <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#4974a7]/10 flex items-center justify-center transition-colors">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#588AE8] hover:bg-[#588AE8]/5 transition-all cursor-pointer">
+                      <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#588AE8]/10 flex items-center justify-center transition-colors">
                         <PlusIcon className="w-6 h-6" />
                       </div>
                       <div className="text-sm text-center">

@@ -42,7 +42,7 @@ export function HeaderMetadata({ metadata, onMetadataChange }) {
             type="text"
             value={metadata.title}
             onChange={(e) => onMetadataChange({ ...metadata, title: e.target.value })}
-            className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all"
+            className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
             placeholder="Enter page title..."
           />
         </div>
@@ -57,7 +57,7 @@ export function HeaderMetadata({ metadata, onMetadataChange }) {
             value={metadata.description}
             onChange={(e) => onMetadataChange({ ...metadata, description: e.target.value })}
             rows={3}
-            className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all resize-none"
+            className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all resize-none"
             placeholder="Enter page description..."
           />
         </div>
@@ -99,16 +99,16 @@ export function HeaderMetadata({ metadata, onMetadataChange }) {
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all"
+                className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
                 placeholder="Add a tag..."
               />
               <button
                 onClick={handleAddTag}
                 disabled={!newTag.trim()}
                 className="px-4 py-2 rounded-lg text-sm text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                style={{ backgroundColor: '#4974a7' }}
+                style={{ backgroundColor: '#588AE8' }}
                 onMouseOver={(e) => !newTag.trim() ? null : e.currentTarget.style.backgroundColor = '#3d6290'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4974a7'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#588AE8'}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -130,7 +130,7 @@ export function HeaderMetadata({ metadata, onMetadataChange }) {
               type="date"
               value={metadata.date}
               onChange={(e) => onMetadataChange({ ...metadata, date: e.target.value })}
-              className="w-full px-3.5 py-2.5 pl-10 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all"
+              className="w-full px-3.5 py-2.5 pl-10 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
             />
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

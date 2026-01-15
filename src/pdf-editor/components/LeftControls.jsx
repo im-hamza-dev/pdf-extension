@@ -119,7 +119,7 @@ export function LeftControls({
               type="text"
               value={metadata.title}
               onChange={(e) => onMetadataChange({ ...metadata, title: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all"
+              className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
               placeholder="Enter page title..."
             />
           </div>
@@ -134,7 +134,7 @@ export function LeftControls({
               value={metadata.description}
               onChange={(e) => onMetadataChange({ ...metadata, description: e.target.value })}
               rows={3}
-              className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all resize-none"
+              className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all resize-none"
               placeholder="Enter page description..."
             />
           </div>
@@ -172,16 +172,16 @@ export function LeftControls({
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all text-sm"
+                  className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all text-sm"
                   placeholder="Add a tag..."
                 />
                 <button
                   onClick={handleAddTag}
                   disabled={!newTag.trim()}
                   className="px-3 py-2 rounded-lg text-sm text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
-                  style={{ backgroundColor: '#4974a7' }}
+                  style={{ backgroundColor: '#588AE8' }}
                   onMouseOver={(e) => !newTag.trim() ? null : e.currentTarget.style.backgroundColor = '#3d6290'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4974a7'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#588AE8'}
                 >
                   <PlusIcon className="w-4 h-4" />
                   Add
@@ -201,7 +201,7 @@ export function LeftControls({
                 type="date"
                 value={metadata.date}
                 onChange={(e) => onMetadataChange({ ...metadata, date: e.target.value })}
-                className="w-full px-3.5 py-2.5 pl-10 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4974a7] focus:border-transparent transition-all"
+                className="w-full px-3.5 py-2.5 pl-10 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
               />
               <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
@@ -221,18 +221,18 @@ export function LeftControls({
               onClick={() => onLayoutSettingsChange({ ...layoutSettings, layout: type })}
               className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
                 layoutSettings.layout === type
-                  ? 'border-[#4974a7] bg-[#4974a7]/5 shadow-sm'
+                  ? 'border-[#588AE8] bg-[#588AE8]/5 shadow-sm'
                   : 'border-gray-200 hover:border-gray-300 bg-white'
               }`}
             >
               <Icon
                 className={`w-7 h-7 ${
-                  layoutSettings.layout === type ? 'text-[#4974a7]' : 'text-gray-500'
+                  layoutSettings.layout === type ? 'text-[#588AE8]' : 'text-gray-500'
                 }`}
               />
               <div className="text-center">
                 <div className={`text-sm ${
-                  layoutSettings.layout === type ? 'text-[#4974a7]' : 'text-gray-900'
+                  layoutSettings.layout === type ? 'text-[#588AE8]' : 'text-gray-900'
                 }`}>
                   {label}
                 </div>
@@ -255,7 +255,7 @@ export function LeftControls({
               onClick={() => onLayoutSettingsChange({ ...layoutSettings, spacing: type })}
               className={`flex-1 px-4 py-2.5 rounded-lg text-sm transition-all ${
                 layoutSettings.spacing === type
-                  ? 'bg-[#4974a7] text-white shadow-sm'
+                  ? 'bg-[#588AE8] text-white shadow-sm'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -281,14 +281,14 @@ export function LeftControls({
               <div
                 className={`w-full h-16 rounded-lg border-2 transition-all ${
                   layoutSettings.background === type
-                    ? 'border-[#4974a7] shadow-lg scale-105'
+                    ? 'border-[#588AE8] shadow-lg scale-105'
                     : 'border-gray-300 hover:border-gray-400 hover:scale-102'
                 }`}
                 style={{ background: color }}
               >
                 {layoutSettings.background === type && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-6 h-6 rounded-full bg-[#4974a7] flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-[#588AE8] flex items-center justify-center">
                       <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>

@@ -369,7 +369,7 @@ function PDFLayoutEditor() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ${logoError ? 'bg-[#4974a7]' : ''}`}>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ${logoError ? 'bg-[#588AE8]' : ''}`}>
                 {logoError ? (
                   <span className="text-white font-semibold">SD</span>
                 ) : (
@@ -407,9 +407,9 @@ function PDFLayoutEditor() {
               <button
                 onClick={handleExportPDF}
                 className="px-6 py-2 text-sm rounded-lg text-white transition-colors shadow-sm"
-                style={{ backgroundColor: '#4974a7' }}
+                style={{ backgroundColor: '#588AE8' }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3d6290'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4974a7'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#588AE8'}
               >
                 Export to PDF
               </button>

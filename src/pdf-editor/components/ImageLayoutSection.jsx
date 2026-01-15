@@ -156,7 +156,7 @@ export function ImageLayoutSection({
       {images.length < maxImages && availableImages.length > 0 && (
         <button
           onClick={handleAddImage}
-          className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-[#4974a7] hover:text-[#4974a7] hover:bg-[#4974a7]/5 transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-[#588AE8] hover:text-[#588AE8] hover:bg-[#588AE8]/5 transition-all flex items-center justify-center gap-2"
         >
           <PlusIcon className="w-5 h-5" />
           Add Screenshot

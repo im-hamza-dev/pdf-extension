@@ -35,7 +35,7 @@ export function PageNavigation({
                   onClick={() => onPageChange(index)}
                   className={`w-20 h-24 rounded-lg border-2 transition-all flex flex-col items-center justify-center gap-1 ${
                     currentPageIndex === index
-                      ? 'border-[#4974a7] bg-[#4974a7]/10 shadow-lg'
+                      ? 'border-[#588AE8] bg-[#588AE8]/10 shadow-lg'
                       : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:shadow-md'
                   }`}
                 >
@@ -55,7 +55,7 @@ export function PageNavigation({
                   </div>
                   
                   <span className={`text-xs ${
-                    currentPageIndex === index ? 'text-[#4974a7] font-medium' : 'text-gray-600'
+                    currentPageIndex === index ? 'text-[#588AE8] font-medium' : 'text-gray-600'
                   }`}>
                     Page {index + 1}
                   </span>
@@ -82,7 +82,7 @@ export function PageNavigation({
             {/* Add Page Button */}
             <button
               onClick={onAddPage}
-              className="w-20 h-24 flex-shrink-0 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-[#4974a7] hover:bg-[#4974a7]/5 transition-all flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-[#4974a7]"
+              className="w-20 h-24 flex-shrink-0 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-[#588AE8] hover:bg-[#588AE8]/5 transition-all flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-[#588AE8]"
             >
               <PlusIcon className="w-5 h-5" />
               <span className="text-xs">Add Page</span>

@@ -21,7 +21,7 @@ const layoutOptions = [
     imageCount: '1 image',
     preview: (
       <div className="w-full h-full p-2">
-        <div className="w-full h-full bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="w-full h-full bg-gradient-to-br from-[#588AE8] to-[#5a5387] rounded"></div>
       </div>
     ),
   },
@@ -32,7 +32,7 @@ const layoutOptions = [
     imageCount: '2 images',
     preview: (
       <div className="w-full h-full p-2 grid grid-rows-2 gap-1">
-        <div className="bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="bg-gradient-to-br from-[#588AE8] to-[#5a5387] rounded"></div>
         <div className="bg-gradient-to-br from-[#5a5387] to-[#574269] rounded"></div>
       </div>
     ),
@@ -44,7 +44,7 @@ const layoutOptions = [
     imageCount: '2 images',
     preview: (
       <div className="w-full h-full p-2 grid grid-cols-2 gap-1">
-        <div className="bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="bg-gradient-to-br from-[#588AE8] to-[#5a5387] rounded"></div>
         <div className="bg-gradient-to-br from-[#5a5387] to-[#574269] rounded"></div>
       </div>
     ),
@@ -56,9 +56,9 @@ const layoutOptions = [
     imageCount: '3 images',
     preview: (
       <div className="w-full h-full p-2 grid grid-cols-3 gap-1">
-        <div className="bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="bg-gradient-to-br from-[#588AE8] to-[#5a5387] rounded"></div>
         <div className="bg-gradient-to-br from-[#5a5387] to-[#574269] rounded"></div>
-        <div className="bg-gradient-to-br from-[#574269] to-[#4974a7] rounded"></div>
+        <div className="bg-gradient-to-br from-[#574269] to-[#588AE8] rounded"></div>
       </div>
     ),
   },
@@ -69,10 +69,10 @@ const layoutOptions = [
     imageCount: '4 images',
     preview: (
       <div className="w-full h-full p-2 grid grid-cols-2 gap-1">
-        <div className="bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="bg-gradient-to-br from-[#588AE8] to-[#5a5387] rounded"></div>
         <div className="bg-gradient-to-br from-[#5a5387] to-[#574269] rounded"></div>
-        <div className="bg-gradient-to-br from-[#574269] to-[#4974a7] rounded"></div>
-        <div className="bg-gradient-to-br from-[#4974a7] to-[#5a5387] rounded"></div>
+        <div className="bg-gradient-to-br from-[#574269] to-[#588AE8] rounded"></div>
+        <div className="bg-gradient-to-br from-[#588AE8] to-[#5a5387] rounded"></div>
       </div>
     ),
   },
@@ -87,7 +87,7 @@ export function LayoutSelectionOverlay({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-[#4974a7]/5 to-[#5a5387]/5">
+        <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-[#588AE8]/5 to-[#5a5387]/5">
           <div>
             <h2 className="text-xl text-gray-900">Select Layout</h2>
             <p className="text-sm text-gray-600 mt-0.5">
@@ -112,7 +112,7 @@ export function LayoutSelectionOverlay({
                 onClick={() => onSelectLayout(option.type)}
                 className={`relative group text-left rounded-xl border-2 transition-all overflow-hidden ${
                   currentLayout === option.type
-                    ? 'border-[#4974a7] bg-[#4974a7]/5 shadow-lg'
+                    ? 'border-[#588AE8] bg-[#588AE8]/5 shadow-lg'
                     : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
                 }`}
               >
@@ -122,7 +122,7 @@ export function LayoutSelectionOverlay({
                   
                   {/* Selected Badge */}
                   {currentLayout === option.type && (
-                    <div className="absolute top-3 right-3 bg-[#4974a7] text-white p-1.5 rounded-full shadow-lg">
+                    <div className="absolute top-3 right-3 bg-[#588AE8] text-white p-1.5 rounded-full shadow-lg">
                       <CheckIcon className="w-4 h-4" />
                     </div>
                   )}
@@ -132,7 +132,7 @@ export function LayoutSelectionOverlay({
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className={`text-base ${
-                      currentLayout === option.type ? 'text-[#4974a7]' : 'text-gray-900'
+                      currentLayout === option.type ? 'text-[#588AE8]' : 'text-gray-900'
                     }`}>
                       {option.name}
                     </h3>
@@ -151,7 +151,7 @@ export function LayoutSelectionOverlay({
                     ? 'opacity-0'
                     : 'opacity-0 group-hover:opacity-100'
                 }`}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#4974a7]/10 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#588AE8]/10 to-transparent"></div>
                 </div>
               </button>
             ))}

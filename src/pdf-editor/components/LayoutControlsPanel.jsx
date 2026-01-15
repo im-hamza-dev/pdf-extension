@@ -75,17 +75,17 @@ export function LayoutControlsPanel({
               onClick={() => onLayoutSettingsChange({ ...layoutSettings, layout: type })}
               className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
                 layoutSettings.layout === type
-                  ? 'border-[#4974a7] bg-[#4974a7]/5'
+                  ? 'border-[#588AE8] bg-[#588AE8]/5'
                   : 'border-gray-200 hover:border-gray-300 bg-white'
               }`}
             >
               <Icon
                 className={`w-6 h-6 ${
-                  layoutSettings.layout === type ? 'text-[#4974a7]' : 'text-gray-600'
+                  layoutSettings.layout === type ? 'text-[#588AE8]' : 'text-gray-600'
                 }`}
               />
               <span className={`text-xs ${
-                layoutSettings.layout === type ? 'text-[#4974a7]' : 'text-gray-600'
+                layoutSettings.layout === type ? 'text-[#588AE8]' : 'text-gray-600'
               }`}>
                 {label}
               </span>
@@ -95,7 +95,7 @@ export function LayoutControlsPanel({
         
         <button
           onClick={onShowLayoutSelection}
-          className="w-full mt-3 py-2 text-sm text-[#4974a7] hover:bg-[#4974a7]/5 rounded-lg transition-colors"
+          className="w-full mt-3 py-2 text-sm text-[#588AE8] hover:bg-[#588AE8]/5 rounded-lg transition-colors"
         >
           View All Layouts
         </button>
@@ -111,7 +111,7 @@ export function LayoutControlsPanel({
               onClick={() => onLayoutSettingsChange({ ...layoutSettings, spacing: type })}
               className={`w-full px-4 py-2.5 rounded-lg text-sm text-left transition-all ${
                 layoutSettings.spacing === type
-                  ? 'bg-[#4974a7] text-white'
+                  ? 'bg-[#588AE8] text-white'
                   : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -134,7 +134,7 @@ export function LayoutControlsPanel({
               onClick={() => onLayoutSettingsChange({ ...layoutSettings, background: type })}
               className={`w-full px-4 py-3 rounded-lg text-sm text-left transition-all border-2 flex items-center gap-3 ${
                 layoutSettings.background === type
-                  ? 'border-[#4974a7] bg-[#4974a7]/5'
+                  ? 'border-[#588AE8] bg-[#588AE8]/5'
                   : 'border-gray-200 hover:border-gray-300 bg-white'
               }`}
             >
@@ -143,7 +143,7 @@ export function LayoutControlsPanel({
                 style={{ background: preview }}
               />
               <span className={
-                layoutSettings.background === type ? 'text-[#4974a7]' : 'text-gray-700'
+                layoutSettings.background === type ? 'text-[#588AE8]' : 'text-gray-700'
               }>
                 {label}
               </span>
@@ -153,7 +153,7 @@ export function LayoutControlsPanel({
       </div>
 
       {/* Tips */}
-      <div className="bg-gradient-to-br from-[#4974a7]/10 to-[#5a5387]/10 rounded-xl border border-[#4974a7]/20 p-5">
+      <div className="bg-gradient-to-br from-[#588AE8]/10 to-[#5a5387]/10 rounded-xl border border-[#588AE8]/20 p-5">
         <h3 className="text-sm text-gray-900 mb-2">💡 Pro Tip</h3>
         <p className="text-sm text-gray-600 leading-relaxed">
           Drag and drop images to reorder them. Use layouts that best showcase your screenshots' content.
