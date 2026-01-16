@@ -31,10 +31,7 @@ function AnnotationApp() {
 
     const imageEditor = new ImageEditor(editorRef.current, {
         includeUI: {
-          loadImage: {
-            path: '',
-            name: 'Screenshot',
-          },
+          loadImage: false, // Disable load button
           theme: {
             'common.bi.image': '',
             'common.bisize.width': '0px',
@@ -45,16 +42,6 @@ function AnnotationApp() {
             'header.backgroundImage': 'none',
             'header.backgroundColor': '#2d2d2d',
             'header.border': '0px',
-            'loadButton.backgroundColor': '#fff',
-            'loadButton.border': '1px solid #ddd',
-            'loadButton.color': '#222',
-            'loadButton.fontFamily': 'NotoSans, sans-serif',
-            'loadButton.fontSize': '12px',
-            'downloadButton.backgroundColor': '#4a90e2',
-            'downloadButton.border': '1px solid #4a90e2',
-            'downloadButton.color': '#fff',
-            'downloadButton.fontFamily': 'NotoSans, sans-serif',
-            'downloadButton.fontSize': '12px',
             'menu.normalIcon.color': '#8a8a8a',
             'menu.activeIcon.color': '#555555',
             'menu.disabledIcon.color': '#434343',
@@ -169,68 +156,116 @@ function AnnotationApp() {
     };
   }, []);
 
+  const hideLoadDownloadButtons = () => {
+    // Hide load and download buttons - try multiple selectors
+    const selectors = [
+      '.tui-image-editor-load-btn',
+      '.tui-image-editor-download-btn',
+      '[class*="load-btn"]',
+      '[class*="Load-btn"]',
+      '[class*="download-btn"]',
+      '[class*="Download-btn"]',
+      'button[aria-label*="load"]',
+      'button[aria-label*="Load"]',
+      'button[aria-label*="download"]',
+      'button[aria-label*="Download"]',
+    ];
+    
+    selectors.forEach(selector => {
+      const buttons = document.querySelectorAll(selector);
+      buttons.forEach(btn => {
+        if (btn && !btn.classList.contains('tui-image-editor-save-btn')) {
+          btn.style.display = 'none';
+          btn.style.visibility = 'hidden';
+          btn.style.opacity = '0';
+          btn.style.width = '0';
+          btn.style.height = '0';
+          btn.style.padding = '0';
+          btn.style.margin = '0';
+          btn.style.pointerEvents = 'none';
+          // Try to remove from DOM if possible
+          if (btn.parentNode) {
+            try {
+              btn.remove();
+            } catch (e) {
+              // If removal fails, keep it hidden
+            }
+          }
+        }
+      });
+    });
+    
+    // Also check all buttons in header and hide any that look like load/download
+    const headerButtons = document.querySelectorAll('.tui-image-editor-header button, .tui-image-editor-controls button');
+    headerButtons.forEach(btn => {
+      const text = btn.textContent || btn.innerText || '';
+      const className = btn.className || '';
+      if ((text.toLowerCase().includes('load') || className.toLowerCase().includes('load') || 
+           text.toLowerCase().includes('download') || className.toLowerCase().includes('download')) &&
+          !btn.classList.contains('tui-image-editor-save-btn')) {
+        btn.style.display = 'none';
+        btn.style.visibility = 'hidden';
+        try {
+          btn.remove();
+        } catch (e) {
+          // Keep hidden if removal fails
+        }
+      }
+    });
+  };
+
   const addSaveButton = (imageEditor, itemId) => {
     // Wait for the UI to be fully initialized
     setTimeout(() => {
-      // Try to find header area where buttons are placed
-      const header = document.querySelector('.tui-image-editor-header') ||
-                     document.querySelector('.tui-image-editor-controls') ||
-                     document.querySelector('.tui-image-editor-top');
+      // Hide load/download buttons immediately
+      hideLoadDownloadButtons();
       
-      // Try to find download button as reference point
-      const downloadBtn = document.querySelector('.tui-image-editor-download-btn') ||
-                          document.querySelector('[class*="download"]') ||
-                          header?.querySelector('button');
+      // Remove any dynamically added save buttons (we only use the fixed one)
+      const existingSaveBtns = document.querySelectorAll('.tui-image-editor-save-btn');
+      existingSaveBtns.forEach(btn => {
+        if (btn && btn.parentNode) {
+          btn.remove();
+        }
+      });
       
-      // Check if button already exists
-      let saveBtn = document.querySelector('.tui-image-editor-save-btn');
-      if (saveBtn) {
-        saveBtn.remove();
+      // Hide buttons again after a delay to catch any late-rendering buttons
+      setTimeout(() => {
+        hideLoadDownloadButtons();
+      }, 500);
+      
+      // Set up mutation observer to catch buttons added dynamically
+      const observer = new MutationObserver(() => {
+        hideLoadDownloadButtons();
+        // Also remove any dynamically added save buttons (keep only fixed one)
+        const dynamicSaveBtns = document.querySelectorAll('.tui-image-editor-save-btn');
+        dynamicSaveBtns.forEach(btn => {
+          if (btn && btn.parentNode && !btn.classList.contains('fixed-save-button')) {
+            btn.remove();
+          }
+        });
+      });
+      
+      // Observe the header/controls area for changes
+      const headerElement = document.querySelector('.tui-image-editor-header') ||
+                            document.querySelector('.tui-image-editor-controls');
+      if (headerElement) {
+        observer.observe(headerElement, {
+          childList: true,
+          subtree: true,
+          attributes: false,
+        });
       }
       
-      // Try to add to header if found, otherwise rely on fixed button in JSX
-      if (header) {
-        saveBtn = document.createElement('button');
-        saveBtn.className = 'tui-image-editor-save-btn';
-        saveBtn.innerHTML = '💾 Save to Queue';
-        saveBtn.style.cssText = `
-          margin-left: 10px;
-          padding: 8px 16px;
-          background-color: #4a90e2;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: 500;
-          z-index: 1000;
-          position: relative;
-        `;
-        saveBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleSave(imageEditor, itemId);
-        };
-        
-        // Insert after download button if found, otherwise append to header
-        if (downloadBtn && downloadBtn.parentNode) {
-          downloadBtn.parentNode.insertBefore(saveBtn, downloadBtn.nextSibling);
-        } else {
-          header.appendChild(saveBtn);
-        }
-        
-        // Hide the fixed button since we successfully added one to header
-        const fixedBtn = document.querySelector('.fixed-save-button');
-        if (fixedBtn) {
-          // fixedBtn.style.display = 'none';
-        }
-      } else {
-        // Keep the fixed button visible if header not found
-        const fixedBtn = document.querySelector('.fixed-save-button');
-        if (fixedBtn) {
-          fixedBtn.style.display = 'block';
-        }
-      }
+      // Also check again after a delay to remove any buttons that appeared late
+      setTimeout(() => {
+        hideLoadDownloadButtons();
+        const dynamicSaveBtns = document.querySelectorAll('.tui-image-editor-save-btn');
+        dynamicSaveBtns.forEach(btn => {
+          if (btn && btn.parentNode && !btn.classList.contains('fixed-save-button')) {
+            btn.remove();
+          }
+        });
+      }, 1500);
     }, 1000); // Increased timeout to ensure UI is fully rendered
   };
 
