@@ -39,6 +39,69 @@ const Maximize2 = ({ className }) => (
   </svg>
 );
 
+// Image Preview Modal Component
+const ImagePreviewModal = ({ screenshot, isOpen, onClose, index, totalCount }) => {
+  if (!isOpen || !screenshot) return null;
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+      onClick={onClose}
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
+    >
+      <div
+        className="relative max-w-[95vw] max-h-[95vh] flex flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-0 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors z-10"
+          aria-label="Close preview"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        {/* Image Counter */}
+        <div className="absolute -top-12 left-0 px-3 py-1.5 rounded-full bg-white/20 text-white text-sm font-medium">
+          {index + 1} / {totalCount}
+        </div>
+
+        {/* Image */}
+        <img
+          src={screenshot.url}
+          alt={`Screenshot ${index + 1}`}
+          className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+        />
+
+        {/* Image Info */}
+        <div className="mt-4 px-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm text-white text-sm">
+          <div className="flex items-center gap-4">
+            <span className="font-medium">Screenshot {index + 1}</span>
+            <span className="text-white/70">
+              {new Date(screenshot.timestamp).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function ScreenshotPopup({
   screenshots,
   onClose,
@@ -51,6 +114,8 @@ export function ScreenshotPopup({
   isPopupContext = false,
 }) {
   const [hoveredId, setHoveredId] = useState(null);
+  const [previewScreenshot, setPreviewScreenshot] = useState(null);
+  const [previewIndex, setPreviewIndex] = useState(0);
   const [logoError, setLogoError] = useState(false);
 
   const formatTime = (date) => {
@@ -193,8 +258,9 @@ export function ScreenshotPopup({
                   onSave={() => onSave(screenshot)}
                   onDelete={() => onDelete(screenshot.id)}
                   onPreview={() => {
-                    // Open image in new tab for preview
-                    window.open(screenshot.url, '_blank');
+                    // Open modal preview
+                    setPreviewScreenshot(screenshot);
+                    setPreviewIndex(index);
                   }}
                 />
               ))}
@@ -226,30 +292,53 @@ export function ScreenshotPopup({
   // For popup context, render directly without modal wrapper
   if (isPopupContext) {
     return (
-      <div 
-        className="bg-white w-full h-full flex flex-col overflow-hidden rounded-lg"
-        style={{ 
-          backgroundColor: 'white', 
-          width: '100%', 
-          height: '100%', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          overflow: 'hidden',
-          borderRadius: '10px'
-        }}
-      >
-        {content}
-      </div>
+      <>
+        <div 
+          className="bg-white w-full h-full flex flex-col overflow-hidden rounded-xl"
+          style={{ 
+            backgroundColor: 'white', 
+            width: '100%', 
+            height: '100%', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            overflow: 'hidden',
+            borderRadius: '12px',
+            border: 'none',
+            boxShadow: 'none',
+            outline: 'none'
+          }}
+        >
+          {content}
+        </div>
+        {/* Image Preview Modal */}
+        <ImagePreviewModal
+          screenshot={previewScreenshot}
+          isOpen={!!previewScreenshot}
+          onClose={() => setPreviewScreenshot(null)}
+          index={previewIndex}
+          totalCount={screenshots.length}
+        />
+      </>
     );
   }
 
   // For modal context, wrap in overlay
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
-        {content}
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+          {content}
+        </div>
       </div>
-    </div>
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        screenshot={previewScreenshot}
+        isOpen={!!previewScreenshot}
+        onClose={() => setPreviewScreenshot(null)}
+        index={previewIndex}
+        totalCount={screenshots.length}
+      />
+    </>
   );
 }
 

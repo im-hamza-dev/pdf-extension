@@ -65,15 +65,24 @@ export function ScreenshotCard({
 
   return (
     <div
-      className="group relative bg-white border-2 border-gray-200 rounded-xl hover:border-[#588AE8] hover:shadow-lg transition-all overflow-hidden"
+      className="group relative bg-white border-2 border-gray-200 rounded-xl hover:border-[#588AE8] hover:shadow-lg transition-all overflow-hidden cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={(e) => {
+        // Only trigger preview if not clicking on action buttons
+        if (!e.target.closest('button[title], .flex.items-center.gap-2')) {
+          onPreview();
+        }
+      }}
     >
       <div className="flex items-center gap-4 p-4">
         {/* Screenshot Preview */}
         <div className="relative flex-shrink-0">
           <button
-            onClick={onPreview}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview();
+            }}
             className="w-32 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hover:border-[#588AE8] transition-all group/preview"
           >
             <img
@@ -118,7 +127,10 @@ export function ScreenshotCard({
           isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
         }`}>
           <button
-            onClick={onEdit}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
             className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all text-sm"
             title="Edit screenshot"
           >
@@ -127,7 +139,10 @@ export function ScreenshotCard({
           </button>
 
           <button
-            onClick={onSave}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSave();
+            }}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-white transition-all text-sm shadow-sm hover:shadow"
             style={{ backgroundColor: "#5a5387" }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#4a4370"}
@@ -139,7 +154,8 @@ export function ScreenshotCard({
           </button>
 
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (confirm('Delete this screenshot?')) {
                 onDelete();
               }

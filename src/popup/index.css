@@ -2,25 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reset all default styling */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Remove Chrome extension popup default styling - must be very aggressive */
+html,
+html[style],
+html * {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+}
+
+body,
+body[style],
+body *:not(button):not(input):not(textarea):not(select) {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+}
+
 body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   width: 800px;
   height: 600px;
   min-width: 800px;
   min-height: 600px;
-  margin: 0;
-  padding: 0;
-  background: white;
-  overflow: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: white !important;
+  overflow: hidden !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  outline: none !important;
+  border-radius: 12px !important;
 }
 
-#root {
-  width: 800px;
-  height: 600px;
-  min-width: 800px;
-  min-height: 600px;
-  display: flex;
-  flex-direction: column;
+#root,
+#root[style] {
+  width: 800px !important;
+  height: 600px !important;
+  min-width: 800px !important;
+  min-height: 600px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: white !important;
+}
+
+/* Override any Tailwind or other CSS that might add borders */
+div[class*="rounded"] {
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
 }
 
 .row {

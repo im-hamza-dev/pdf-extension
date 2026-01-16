@@ -8,13 +8,28 @@
   <style>
     html,
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0 !important;
+      padding: 0 !important;
       width: 800px;
       height: 600px;
       min-width: 800px;
       min-height: 600px;
       overflow: hidden;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      border-radius: 0 !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+    }
+    
+    /* Remove Chrome extension popup default styling */
+    body[style*="border"],
+    body[style*="box-shadow"],
+    body[style*="border-radius"] {
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
     }
   </style>
 </head>
