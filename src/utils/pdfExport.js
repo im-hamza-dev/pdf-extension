@@ -148,6 +148,7 @@ export async function exportPDFWithLayout(
 
   // Constants matching the preview
   const PAGE_PADDING_MM = 12.7; // p-12 in Tailwind = 48px = 12.7mm at 96 DPI
+  const TOP_PADDING_EXTRA_MM = 10; // Additional top padding for each page
   const HEADER_MARGIN_BOTTOM_MM = 8; // mb-8 = 32px = 8.5mm
   const MM_TO_PX = 3.7795275591;
 
@@ -252,7 +253,9 @@ async function renderBugReport(
     pdf.rect(0, 0, pageW, pageH, 'F');
   }
 
-  let currentY = PAGE_PADDING_MM;
+  // Increased top padding for each page
+  const TOP_PADDING_EXTRA_MM = 10;
+  let currentY = PAGE_PADDING_MM + TOP_PADDING_EXTRA_MM;
 
   // Only render header banner on first page with global title/subtitle
   if (isFirstPage) {
@@ -405,6 +408,7 @@ async function renderBugReport(
         // Use rounded rectangle with larger radius (3mm) to match rounded-full in preview
         // Increased vertical padding: height 6mm (from 4mm), position adjusted
         const badgeHeight = 6; // Increased from 4 to 6 for more vertical padding
+        const badgePaddingY = 2; // Vertical padding for each tag (2mm)
         pdf.roundedRect(
           badgeX,
           currentY - badgeHeight / 2 + 1,
@@ -415,7 +419,7 @@ async function renderBugReport(
           'F'
         );
         pdf.setTextColor(textColor.r, textColor.g, textColor.b);
-        pdf.text(badge.text, badgeX + 3, currentY);
+        pdf.text(badge.text, badgeX + 3, currentY + badgePaddingY);
         badgeX += badgeWidth + 2.1; // gap-2
       });
       pdf.setTextColor(0, 0, 0);
@@ -449,7 +453,7 @@ async function renderBugReport(
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(17, 24, 39);
     pdf.text('Screenshots', PAGE_PADDING_MM, currentY);
-    currentY += 5.3; // 20px margin bottom (20px / 3.78 ≈ 5.3mm)
+    currentY += 2.3; // 20px margin bottom (20px / 3.78 ≈ 5.3mm)
 
     // Grid layout for screenshots (1 column for single image, 2 columns for multiple)
     const cols = images.length === 1 ? 1 : 2;
@@ -636,7 +640,9 @@ async function renderGeneralReport(
     pdf.rect(0, 0, pageW, pageH, 'F');
   }
 
-  let currentY = PAGE_PADDING_MM;
+  // Increased top padding for each page
+  const TOP_PADDING_EXTRA_MM = 10;
+  let currentY = PAGE_PADDING_MM + TOP_PADDING_EXTRA_MM;
 
   // Add header section (title, description, tags, date)
   if (metadata.title) {
@@ -658,16 +664,18 @@ async function renderGeneralReport(
     let tagDateY = currentY;
     if (metadata.tags && metadata.tags.length > 0) {
       pdf.setFontSize(10); // text-sm = 14px ≈ 3.7mm
-      pdf.setFillColor(90, 83, 135); // #5a5387 - consistent background color
       metadata.tags.forEach((tag, idx) => {
         const tagTextWidth = pdf.getTextWidth(tag);
         const tagPadding = 3.2; // px-3 = 12px = 3.2mm padding (consistent)
+        const tagPaddingY = 2;
         const tagWidth = tagTextWidth + tagPadding * 2;
         const tagHeight = 6; // Increased height for proper vertical padding (matching bug report)
         if (tagDateX + tagWidth > pageW - PAGE_PADDING_MM) {
           tagDateX = PAGE_PADDING_MM;
           tagDateY += 7; // Slightly more space between rows
         }
+        // Set fill color BEFORE drawing each tag background
+        pdf.setFillColor(90, 83, 135); // #5a5387 - consistent background color
         // Draw tag background with rounded corners (rounded-full = large radius)
         // Use radius approximately half the height for rounded-full effect
         pdf.roundedRect(
@@ -679,8 +687,9 @@ async function renderGeneralReport(
           3,
           'F'
         );
+
         pdf.setTextColor(255, 255, 255); // White text (consistent)
-        pdf.text(tag, tagDateX + tagPadding, tagDateY);
+        pdf.text(tag, tagDateX + tagPadding, tagDateY + tagPaddingY);
         tagDateX += tagWidth + 2.1; // gap-2 = 8px = 2.1mm
       });
       pdf.setTextColor(0, 0, 0);

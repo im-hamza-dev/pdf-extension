@@ -34,6 +34,7 @@ function PDFLayoutEditor() {
   }
 
   async function initializePages(images) {
+    // Only create one page initially, don't create multiple pages automatically
     if (images.length === 0) {
       // Create empty page
       const emptyPage = createEmptyPage();
@@ -41,58 +42,51 @@ function PDFLayoutEditor() {
       return;
     }
 
-    // Create pages based on images
+    // Create only the first page with the first image (if available)
     const layoutType = LAYOUT_TYPES.SINGLE;
-    const maxImagesPerLayout = 1; // Start with single layout
-
-    const newPages = [];
-    for (let i = 0; i < images.length; i += maxImagesPerLayout) {
-      const pageImages = images.slice(i, i + maxImagesPerLayout);
-      const pageItems = await Promise.all(
-        pageImages.map((img, idx) => createLayoutItem(img, idx, layoutType, maxImagesPerLayout))
-      );
-      
-      const pageImagesFormatted = pageItems.map(item => ({
-        id: item.id,
-        url: item.imageUrl,
-        imageUrl: item.imageUrl,
-        dataUrl: item.dataUrl,
-        alt: item.title || 'Screenshot',
-        imageId: item.imageId,
-      }));
-
-      const browserInfo = getBrowserInfo();
-      const deviceInfo = detectDevice();
-      
-      const page = {
-        id: `page-${i}`,
-        metadata: {
-          title: `Page ${newPages.length + 1}`,
-          description: '',
-          tags: [],
-          date: new Date().toISOString().split('T')[0],
-          // Bug report specific fields
-          subtitle: '',
-          priority: 'Medium',
-          stepsToReproduce: [],
-          browser: browserInfo,
-          device: deviceInfo
-        },
-        images: pageImagesFormatted,
-        layoutSettings: {
-          layout: layoutType,
-          spacing: 'medium',
-          background: 'white'
-        }
-      };
-      newPages.push(page);
-    }
-
-    if (newPages.length === 0) {
-      newPages.push(createEmptyPage());
-    }
+    const maxImagesPerLayout = 1;
     
-    setPages(newPages);
+    const firstImage = images[0];
+    const pageItems = await Promise.all(
+      [firstImage].map((img, idx) => createLayoutItem(img, idx, layoutType, maxImagesPerLayout))
+    );
+    
+    const pageImagesFormatted = pageItems.map(item => ({
+      id: item.id,
+      url: item.imageUrl,
+      imageUrl: item.imageUrl,
+      dataUrl: item.dataUrl,
+      alt: item.title || 'Screenshot',
+      imageId: item.imageId,
+    }));
+
+    const browserInfo = getBrowserInfo();
+    const deviceInfo = detectDevice();
+    
+    const firstPage = {
+      id: 'page-0',
+      metadata: {
+        title: 'Page 1',
+        description: '',
+        tags: [],
+        date: new Date().toISOString().split('T')[0],
+        // Bug report specific fields
+        subtitle: '',
+        priority: 'Medium',
+        stepsToReproduce: [],
+        browser: browserInfo,
+        device: deviceInfo
+      },
+      images: pageImagesFormatted,
+      layoutSettings: {
+        layout: layoutType,
+        spacing: 'medium',
+        background: 'white'
+      }
+    };
+    
+    // Only create one page initially
+    setPages([firstPage]);
   }
 
   function createEmptyPage() {
