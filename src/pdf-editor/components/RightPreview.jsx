@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getGridClass, getSpacingClass, getBackgroundStyle } from '../utils/layoutHelpers.js';
-import { LAYOUT_TYPES } from '../utils/constants.js';
+import { LAYOUT_TYPES, PRIORITY_COLORS } from '../utils/constants.js';
 
 // Icon components
 const PlusIcon = ({ className }) => (
@@ -216,7 +216,9 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                   {(metadata.priority || metadata.browser || metadata.device) && (
                     <div className="flex gap-2 mb-6">
                       {metadata.priority && (
-                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700 border border-gray-300">
+                        <span className={`px-3 py-1 rounded-full text-sm border ${
+                          PRIORITY_COLORS[metadata.priority]?.tailwind || 'bg-gray-100 text-gray-700 border-gray-300'
+                        }`}>
                           Priority: {metadata.priority}
                         </span>
                       )}

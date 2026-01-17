@@ -316,12 +316,7 @@ function PDFLayoutEditor() {
     try {
       // Pass pages directly - export function now handles the layout matching the preview
       await exportPDFWithLayout(pages, queue, reportType);
-      // Close the tab after export
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs && tabs[0]) {
-          chrome.tabs.remove(tabs[0].id);
-        }
-      });
+      // Don't close the tab - let user continue working
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export PDF. Please try again.');

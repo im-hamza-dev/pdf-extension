@@ -44,3 +44,27 @@ export const PRIORITY_LEVELS = {
   HIGH: 'High',
   CRITICAL: 'Critical',
 };
+
+// Priority colors (RGB for PDF, Tailwind classes for preview)
+export const PRIORITY_COLORS = {
+  'Low': {
+    rgb: { r: 220, g: 252, b: 231 }, // green-100
+    textRgb: { r: 22, g: 101, b: 52 }, // green-800
+    tailwind: 'bg-green-100 text-green-800 border-green-300',
+  },
+  'Medium': {
+    rgb: { r: 254, g: 243, b: 199 }, // yellow-100
+    textRgb: { r: 133, g: 77, b: 14 }, // yellow-800
+    tailwind: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  },
+  'High': {
+    rgb: { r: 254, g: 226, b: 226 }, // red-100
+    textRgb: { r: 153, g: 27, b: 27 }, // red-800
+    tailwind: 'bg-red-100 text-red-800 border-red-300',
+  },
+  'Critical': {
+    rgb: { r: 254, g: 226, b: 226 }, // red-100 (darker red)
+    textRgb: { r: 127, g: 29, b: 29 }, // red-900
+    tailwind: 'bg-red-200 text-red-900 border-red-400',
+  },
+};
