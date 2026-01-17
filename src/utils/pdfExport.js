@@ -538,20 +538,36 @@ async function renderBugReport(
       const slotX = x + (imageWidth - w) / 2;
       const slotY = y + (imageHeight - h) / 2;
 
-      // Add box shadow effect (draw multiple gray rectangles behind the image for shadow)
-      const shadowBlur = 1; // mm for shadow blur
-      const shadowOffset = 1; // mm offset
-      // Draw shadow layers for blur effect
-      for (let i = 0; i < 3; i++) {
-        const shadowSize = shadowBlur - i * 0.3;
-        pdf.setFillColor(200 + i * 5, 200 + i * 5, 200 + i * 5); // Lighter gray for each layer
+      // Add box shadow effect (scattered/blurred shadow)
+      // Draw multiple overlapping rectangles that progressively get larger, lighter, and more offset
+      const shadowSpread = 4.5; // mm total spread of shadow (slightly more scattered)
+      const shadowOffsetX = 0; // mm horizontal offset (shadow goes right)
+      const shadowOffsetY = 0; // mm vertical offset (shadow goes down)
+      const shadowLayers = 12; // More layers for smoother scattered effect
+
+      // Draw shadow layers from largest (outermost, lightest) to smallest (innermost, darkest)
+      // Each layer is progressively smaller and darker
+      for (let i = shadowLayers - 1; i >= 0; i--) {
+        const progress = i / (shadowLayers - 1); // 1.0 (outermost) to 0.0 (innermost)
+
+        // Shadow spread increases from 0 to shadowSpread
+        const spreadAmount = shadowSpread * progress;
+
+        // Offset increases with layer (outer layers offset more)
+        const offsetX = shadowOffsetX * (0.2 + progress * 0.8);
+        const offsetY = shadowOffsetY * (0.2 + progress * 0.8);
+
+        // Color gets lighter and more faded as we go outward (from light gray 220 to nearly white 250)
+        const grayValue = 230 + progress * 20; // More light gray and faded
+
+        pdf.setFillColor(grayValue, grayValue, grayValue);
         pdf.roundedRect(
-          slotX + shadowOffset - shadowSize / 2,
-          slotY + shadowOffset - shadowSize / 2,
-          w + shadowSize,
-          h + shadowSize,
-          2 + shadowSize / 2,
-          2 + shadowSize / 2,
+          slotX + offsetX - spreadAmount / 2,
+          slotY + offsetY - spreadAmount / 2,
+          w + spreadAmount,
+          h + spreadAmount,
+          2 + spreadAmount / 4,
+          2 + spreadAmount / 4,
           'F'
         );
       }
@@ -834,20 +850,36 @@ async function renderGeneralReport(
         const slotX = x + (finalImageWidth - w) / 2;
         const slotY = y + (finalImageHeight - h) / 2;
 
-        // Add box shadow effect (draw multiple gray rectangles behind the image for shadow)
-        const shadowBlur = 1; // mm for shadow blur
-        const shadowOffset = 1; // mm offset
-        // Draw shadow layers for blur effect
-        for (let i = 0; i < 3; i++) {
-          const shadowSize = shadowBlur - i * 0.3;
-          pdf.setFillColor(200 + i * 5, 200 + i * 5, 200 + i * 5); // Lighter gray for each layer
+        // Add box shadow effect (scattered/blurred shadow)
+        // Draw multiple overlapping rectangles that progressively get larger, lighter, and more offset
+        const shadowSpread = 4.5; // mm total spread of shadow (slightly more scattered)
+        const shadowOffsetX = 0; // mm horizontal offset (shadow goes right)
+        const shadowOffsetY = 0; // mm vertical offset (shadow goes down)
+        const shadowLayers = 12; // More layers for smoother scattered effect
+
+        // Draw shadow layers from largest (outermost, lightest) to smallest (innermost, darkest)
+        // Each layer is progressively smaller and darker
+        for (let i = shadowLayers - 1; i >= 0; i--) {
+          const progress = i / (shadowLayers - 1); // 1.0 (outermost) to 0.0 (innermost)
+
+          // Shadow spread increases from 0 to shadowSpread
+          const spreadAmount = shadowSpread * progress;
+
+          // Offset increases with layer (outer layers offset more)
+          const offsetX = shadowOffsetX * (0.2 + progress * 0.8);
+          const offsetY = shadowOffsetY * (0.2 + progress * 0.8);
+
+          // Color gets lighter and more faded as we go outward (from light gray 200 to nearly white 250)
+          const grayValue = 230 + progress * 20; // More light gray and faded
+
+          pdf.setFillColor(grayValue, grayValue, grayValue);
           pdf.roundedRect(
-            slotX + shadowOffset - shadowSize / 2,
-            slotY + shadowOffset - shadowSize / 2,
-            w + shadowSize,
-            h + shadowSize,
-            2 + shadowSize / 2,
-            2 + shadowSize / 2,
+            slotX + offsetX - spreadAmount / 2,
+            slotY + offsetY - spreadAmount / 2,
+            w + spreadAmount,
+            h + spreadAmount,
+            2 + spreadAmount / 4,
+            2 + spreadAmount / 4,
             'F'
           );
         }
