@@ -21,13 +21,26 @@ export const LAYOUT_TYPES = {
 export const SPACING_TYPES = {
   SMALL: 'small',
   MEDIUM: 'medium',
-  LARGE: 'large'
+  LARGE: 'large',
 };
 
 // Background types
 export const BACKGROUND_TYPES = {
   WHITE: 'white',
   LIGHT_GRAY: 'light-gray',
-  GRADIENT: 'gradient'
+  GRADIENT: 'gradient',
 };
 
+// Report types
+export const REPORT_TYPES = {
+  GENERAL: 'general-report',
+  BUG: 'bug-report',
+};
+
+// Priority levels
+export const PRIORITY_LEVELS = {
+  LOW: 'Low',
+  MEDIUM: 'Medium',
+  HIGH: 'High',
+  CRITICAL: 'Critical',
+};

@@ -7,7 +7,8 @@ import { PageNavigation } from './components/PageNavigation';
 import { ImageGallery } from './components/ImageGallery';
 import { ScreenshotPopup } from '../components/ScreenshotPopup';
 import { createLayoutItem } from './utils/layoutHelpers';
-import { LAYOUT_TYPES } from './utils/constants';
+import { LAYOUT_TYPES, REPORT_TYPES } from './utils/constants';
+import { getBrowserInfo, detectDevice } from './utils/browserDetection';
 
 function PDFLayoutEditor() {
   const [queue, setQueue] = useState([]);
@@ -17,6 +18,7 @@ function PDFLayoutEditor() {
   const [pendingReplaceSlot, setPendingReplaceSlot] = useState(null);
   const [showScreenshotPopup, setShowScreenshotPopup] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [reportType, setReportType] = useState(REPORT_TYPES.GENERAL);
 
   useEffect(() => {
     loadQueue();
@@ -59,13 +61,22 @@ function PDFLayoutEditor() {
         imageId: item.imageId,
       }));
 
+      const browserInfo = getBrowserInfo();
+      const deviceInfo = detectDevice();
+      
       const page = {
         id: `page-${i}`,
         metadata: {
           title: `Page ${newPages.length + 1}`,
           description: '',
           tags: [],
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0],
+          // Bug report specific fields
+          subtitle: '',
+          priority: 'Medium',
+          stepsToReproduce: [],
+          browser: browserInfo,
+          device: deviceInfo
         },
         images: pageImagesFormatted,
         layoutSettings: {
@@ -85,13 +96,22 @@ function PDFLayoutEditor() {
   }
 
   function createEmptyPage() {
+    const browserInfo = getBrowserInfo();
+    const deviceInfo = detectDevice();
+    
     return {
       id: `page-${Date.now()}`,
       metadata: {
         title: 'New Page',
         description: '',
         tags: [],
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        // Bug report specific fields
+        subtitle: '',
+        priority: 'Medium',
+        stepsToReproduce: [],
+        browser: browserInfo,
+        device: deviceInfo
       },
       images: [],
       layoutSettings: {
@@ -295,7 +315,7 @@ function PDFLayoutEditor() {
   async function handleExportPDF() {
     try {
       // Pass pages directly - export function now handles the layout matching the preview
-      await exportPDFWithLayout(pages, queue);
+      await exportPDFWithLayout(pages, queue, reportType);
       // Close the tab after export
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs && tabs[0]) {
@@ -425,8 +445,10 @@ function PDFLayoutEditor() {
           <LeftControls
             metadata={currentPage.metadata}
             layoutSettings={currentPage.layoutSettings}
+            reportType={reportType}
             onMetadataChange={(metadata) => updateCurrentPage({ metadata })}
             onLayoutSettingsChange={handleLayoutSettingsChange}
+            onReportTypeChange={setReportType}
           />
         </div>
 
@@ -434,6 +456,8 @@ function PDFLayoutEditor() {
         <div className="flex-1 overflow-y-auto" onClick={handleCancelReplace}>
           <RightPreview
             page={currentPage}
+            reportType={reportType}
+            pages={pages}
             onImagesChange={handleImagesChange}
             availableImages={availableImages}
             onAddImage={handleAddImage}

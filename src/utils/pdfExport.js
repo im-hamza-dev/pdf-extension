@@ -137,7 +137,11 @@ function mmToPx(mm) {
 }
 
 // Export PDF with custom layout matching the preview
-export async function exportPDFWithLayout(pages, queue) {
+export async function exportPDFWithLayout(
+  pages,
+  queue,
+  reportType = 'general-report'
+) {
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
@@ -189,218 +193,590 @@ export async function exportPDFWithLayout(pages, queue) {
       pdf.rect(0, 0, pageW, pageH, 'F');
     }
 
-    let currentY = PAGE_PADDING_MM;
+    // Check if this is a bug report
+    const isBugReport = reportType === 'bug-report';
 
-    // Add header section (title, description, tags, date)
-    if (metadata.title) {
-      pdf.setFontSize(24); // text-3xl = 30px ≈ 8mm
-      pdf.setFont('helvetica', 'bold');
-      const titleLines = pdf.splitTextToSize(
-        metadata.title,
-        pageW - PAGE_PADDING_MM * 2
+    if (isBugReport) {
+      // Get global metadata from first page (title, subtitle)
+      const firstPageMetadata = pages[0]?.metadata || {};
+      // Render bug report format - pass pageIndex to know if it's first page
+      await renderBugReport(
+        pdf,
+        page,
+        pageW,
+        pageH,
+        PAGE_PADDING_MM,
+        pageIndex === 0, // isFirstPage
+        firstPageMetadata // global metadata for title/subtitle
       );
-      pdf.text(titleLines, PAGE_PADDING_MM, currentY);
-      currentY += titleLines.length * 8 + 3; // mb-3 = 12px = 3mm
-    }
-
-    // Tags and date on same line
-    if ((metadata.tags && metadata.tags.length > 0) || metadata.date) {
-      let tagDateX = PAGE_PADDING_MM;
-
-      // Add tags
-      let tagDateY = currentY;
-      if (metadata.tags && metadata.tags.length > 0) {
-        pdf.setFontSize(10); // text-sm = 14px ≈ 3.7mm
-        pdf.setFillColor(90, 83, 135); // #5a5387
-        metadata.tags.forEach((tag, idx) => {
-          const tagTextWidth = pdf.getTextWidth(tag);
-          const tagPadding = 3; // px-3 = 12px = 3.2mm padding
-          const tagWidth = tagTextWidth + tagPadding * 2;
-          const tagHeight = 5; // Height for tag background
-          if (tagDateX + tagWidth > pageW - PAGE_PADDING_MM) {
-            tagDateX = PAGE_PADDING_MM;
-            tagDateY += 6;
-          }
-          // Draw tag background
-          pdf.rect(
-            tagDateX,
-            tagDateY - tagHeight + 1,
-            tagWidth,
-            tagHeight,
-            'F'
-          );
-          pdf.setTextColor(255, 255, 255);
-          pdf.text(tag, tagDateX + tagPadding, tagDateY);
-          tagDateX += tagWidth + 2.1; // gap-2 = 8px = 2.1mm
-        });
-        pdf.setTextColor(0, 0, 0);
-        tagDateX += 4.2; // gap-4 = 16px = 4.2mm
-      }
-
-      // Add date
-      if (metadata.date) {
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(107, 114, 128); // text-gray-500
-        const dateStr = new Date(metadata.date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-        pdf.text(dateStr, tagDateX, tagDateY);
-        pdf.setTextColor(0, 0, 0);
-      }
-
-      // Update currentY based on tag/date height
-      if (tagDateY > currentY) {
-        currentY = tagDateY;
-      }
-
-      currentY += HEADER_MARGIN_BOTTOM_MM;
     } else {
-      currentY += HEADER_MARGIN_BOTTOM_MM;
-    }
-
-    // Calculate grid layout for images
-    const availableWidth = pageW - PAGE_PADDING_MM * 2;
-    const availableHeight = pageH - currentY - PAGE_PADDING_MM;
-    const spacingMM = getSpacingMM(layoutSettings.spacing);
-
-    let cols, rows;
-    switch (layoutSettings.layout) {
-      case 'single':
-        cols = 1;
-        rows = 1;
-        break;
-      case 'two-row':
-        cols = 1;
-        rows = 2;
-        break;
-      case 'two-column':
-        cols = 2;
-        rows = Math.ceil(images.length / 2);
-        break;
-      case 'three-grid':
-        cols = 3;
-        rows = Math.ceil(images.length / 3);
-        break;
-      case 'four-grid':
-        cols = 2;
-        rows = Math.ceil(images.length / 2);
-        break;
-      default:
-        cols = 1;
-        rows = 1;
-    }
-
-    // Calculate image dimensions based on grid
-    const totalSpacingWidth = spacingMM * (cols - 1);
-    const totalSpacingHeight = spacingMM * (rows - 1);
-    const imageWidth = (availableWidth - totalSpacingWidth) / cols;
-    const imageHeight = imageWidth / (16 / 10); // 16:10 aspect ratio
-
-    // If images are too tall, adjust
-    const maxImageHeight = (availableHeight - totalSpacingHeight) / rows;
-    let finalImageHeight = Math.min(imageHeight, maxImageHeight);
-    let finalImageWidth = finalImageHeight * (16 / 10);
-
-    // Recalculate if width doesn't fit
-    if (finalImageWidth * cols + totalSpacingWidth > availableWidth) {
-      finalImageWidth = (availableWidth - totalSpacingWidth) / cols;
-      finalImageHeight = finalImageWidth / (16 / 10);
-    }
-
-    // Add images in grid - use Promise.all to wait for all images
-    await Promise.all(
-      images.map(async (image, index) => {
-        // Check for image with any URL property
-        const imageUrl = image?.imageUrl || image?.url || image?.dataUrl;
-        if (!image || !imageUrl) {
-          console.warn(
-            `Skipping image at index ${index}: no valid URL found`,
-            image
-          );
-          return;
-        }
-
-        const row = Math.floor(index / cols);
-        const col = index % cols;
-
-        const x = PAGE_PADDING_MM + col * (finalImageWidth + spacingMM);
-        const y = currentY + row * (finalImageHeight + spacingMM);
-
-        try {
-          // Optimize image before adding
-          const optimizedImage = await getOptimizedImage(imageUrl);
-
-          // Load optimized image to get dimensions
-          const img = await new Promise((resolve, reject) => {
-            const imgEl = new Image();
-            imgEl.onload = () => resolve(imgEl);
-            imgEl.onerror = (err) => {
-              console.error(
-                `Failed to load optimized image at index ${index}:`,
-                optimizedImage.substring(0, 50) + '...',
-                err
-              );
-              reject(err);
-            };
-            imgEl.src = optimizedImage;
-          });
-
-          // Calculate actual dimensions maintaining aspect ratio
-          const imgAspectRatio = img.width / img.height;
-          const slotAspectRatio = 16 / 10;
-
-          let w, h;
-          if (imgAspectRatio > slotAspectRatio) {
-            // Image is wider - fit to width
-            w = finalImageWidth;
-            h = finalImageWidth / imgAspectRatio;
-            if (h > finalImageHeight) {
-              h = finalImageHeight;
-              w = finalImageHeight * imgAspectRatio;
-            }
-          } else {
-            // Image is taller - fit to height
-            h = finalImageHeight;
-            w = finalImageHeight * imgAspectRatio;
-            if (w > finalImageWidth) {
-              w = finalImageWidth;
-              h = finalImageWidth / imgAspectRatio;
-            }
-          }
-
-          // Center image in slot
-          const slotX = x + (finalImageWidth - w) / 2;
-          const slotY = y + (finalImageHeight - h) / 2;
-
-          // Use JPEG format for optimized images
-          pdf.addImage(optimizedImage, 'JPEG', slotX, slotY, w, h);
-        } catch (error) {
-          console.error(`Error adding image at index ${index}:`, error);
-          // Continue with other images even if one fails
-        }
-      })
-    );
-
-    // Move cursor BELOW the image grid before adding description
-    const gridHeight = rows * finalImageHeight + totalSpacingHeight;
-    currentY += gridHeight;
-    // Add a little margin below images (similar to mt-4)
-    currentY += 4.2;
-
-    if (metadata.description) {
-      pdf.setFontSize(16); // text-base = 16px ≈ 4.2mm
-      pdf.setFont('helvetica', 'normal');
-      const descLines = pdf.splitTextToSize(
-        metadata.description,
-        pageW - PAGE_PADDING_MM * 2
+      // Render general report format (existing code)
+      await renderGeneralReport(
+        pdf,
+        page,
+        pageW,
+        pageH,
+        PAGE_PADDING_MM,
+        HEADER_MARGIN_BOTTOM_MM,
+        getSpacingMM
       );
-      pdf.text(descLines, PAGE_PADDING_MM, currentY);
-      currentY += descLines.length * 4.2 + 4.2; // line height + margin
     }
   }
 
-  pdf.save('screenshots-layout.pdf');
+  pdf.save(
+    reportType === 'bug-report' ? 'bug-report.pdf' : 'screenshots-layout.pdf'
+  );
+}
+
+async function renderBugReport(
+  pdf,
+  page,
+  pageW,
+  pageH,
+  PAGE_PADDING_MM,
+  isFirstPage,
+  globalMetadata
+) {
+  const { metadata, images } = page; // metadata is page-specific (description, priority, browser, device)
+
+  // Set white background
+  pdf.setFillColor(255, 255, 255);
+  pdf.rect(0, 0, pageW, pageH, 'F');
+
+  let currentY = PAGE_PADDING_MM;
+
+  // Only render header banner on first page with global title/subtitle
+  if (isFirstPage) {
+    // Calculate header content height first
+    let headerContentY = 8; // Padding from top
+
+    // Window controls (three dots)
+    headerContentY += 8;
+
+    // Title (from global metadata)
+    if (globalMetadata.title) {
+      pdf.setFontSize(20); // text-3xl equivalent
+      const titleLines = pdf.splitTextToSize(
+        globalMetadata.title,
+        pageW - PAGE_PADDING_MM * 2
+      );
+      headerContentY += titleLines.length * 6 + 2;
+    }
+
+    // Subtitle (from global metadata)
+    if (globalMetadata.subtitle) {
+      pdf.setFontSize(12); // text-lg equivalent
+      const subtitleLines = pdf.splitTextToSize(
+        globalMetadata.subtitle,
+        pageW - PAGE_PADDING_MM * 2
+      );
+      headerContentY += subtitleLines.length * 5 + 4;
+    }
+
+    // Calculate badge positions
+    headerContentY += 2;
+    const badges = [];
+    if (metadata.priority) {
+      badges.push(`Priority: ${metadata.priority}`);
+    }
+    if (metadata.browser) {
+      badges.push(`Browser: ${metadata.browser}`);
+    }
+    if (metadata.device) {
+      badges.push(`Device: ${metadata.device}`);
+    }
+
+    pdf.setFontSize(8); // text-sm
+    let badgeX = PAGE_PADDING_MM;
+    let badgeY = headerContentY;
+    badges.forEach((badge) => {
+      const badgeWidth = pdf.getTextWidth(badge) + 6;
+      if (badgeX + badgeWidth > pageW - PAGE_PADDING_MM) {
+        badgeX = PAGE_PADDING_MM;
+        badgeY += 5;
+      }
+      badgeX += badgeWidth + 2.1; // gap-2
+    });
+    if (badges.length > 0) {
+      headerContentY = badgeY + 5;
+    }
+
+    const headerHeight = headerContentY + 8; // Add bottom padding
+
+    // Draw header background with gradient effect (approximated)
+    // Since jsPDF doesn't support gradients directly, we'll use a gradient-like effect
+    // by drawing multiple rectangles with different colors
+    const gradientSteps = 20;
+    const startColor = { r: 88, g: 138, b: 232 }; // #588AE8
+    const endColor = { r: 90, g: 83, b: 135 }; // #5a5387
+
+    for (let i = 0; i < gradientSteps; i++) {
+      const ratio = i / (gradientSteps - 1);
+      const r = Math.round(startColor.r + (endColor.r - startColor.r) * ratio);
+      const g = Math.round(startColor.g + (endColor.g - startColor.g) * ratio);
+      const b = Math.round(startColor.b + (endColor.b - startColor.b) * ratio);
+
+      pdf.setFillColor(r, g, b);
+      const y = (headerHeight / gradientSteps) * i;
+      const h = headerHeight / gradientSteps;
+      pdf.rect(0, y, pageW, h + 1, 'F'); // +1 to avoid gaps
+    }
+
+    // Now draw the content on top
+    let headerY = 8;
+
+    // Window controls (three dots)
+    pdf.setFillColor(200, 200, 200); // Lighter color for opacity effect
+    for (let i = 0; i < 3; i++) {
+      pdf.circle(PAGE_PADDING_MM + i * 5, headerY, 1.5, 'F');
+    }
+
+    headerY += 8;
+
+    // Title (from global metadata)
+    if (globalMetadata.title) {
+      pdf.setFontSize(20); // text-3xl equivalent
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(255, 255, 255);
+      const titleLines = pdf.splitTextToSize(
+        globalMetadata.title,
+        pageW - PAGE_PADDING_MM * 2
+      );
+      pdf.text(titleLines, PAGE_PADDING_MM, headerY);
+      headerY += titleLines.length * 6 + 2;
+    }
+
+    // Subtitle (from global metadata)
+    if (globalMetadata.subtitle) {
+      pdf.setFontSize(12); // text-lg equivalent
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(240, 240, 240); // Slightly lighter white for opacity effect
+      const subtitleLines = pdf.splitTextToSize(
+        globalMetadata.subtitle,
+        pageW - PAGE_PADDING_MM * 2
+      );
+      pdf.text(subtitleLines, PAGE_PADDING_MM, headerY);
+      headerY += subtitleLines.length * 5 + 4;
+    }
+
+    // Priority, Status, Browser badges (from page metadata)
+    headerY += 2;
+    badgeX = PAGE_PADDING_MM;
+    badges.forEach((badge) => {
+      const badgeWidth = pdf.getTextWidth(badge) + 6;
+      if (badgeX + badgeWidth > pageW - PAGE_PADDING_MM) {
+        badgeX = PAGE_PADDING_MM;
+        headerY += 5;
+      }
+      // Draw badge background with semi-transparent effect
+      pdf.setFillColor(230, 230, 230); // Light gray for semi-transparent effect
+      pdf.roundedRect(badgeX, headerY - 3, badgeWidth, 4, 2, 2, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.text(badge, badgeX + 3, headerY);
+      badgeX += badgeWidth + 2.1; // gap-2
+    });
+    pdf.setTextColor(0, 0, 0);
+
+    currentY = headerHeight + PAGE_PADDING_MM;
+  }
+
+  // Content section
+  // Description
+  if (metadata.description) {
+    pdf.setFontSize(12); // text-lg
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(17, 24, 39); // text-gray-900
+    pdf.text('Description', PAGE_PADDING_MM, currentY);
+    currentY += 5;
+
+    pdf.setFontSize(10); // text-base
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(75, 85, 99); // text-gray-600
+    const descLines = pdf.splitTextToSize(
+      metadata.description,
+      pageW - PAGE_PADDING_MM * 2
+    );
+    pdf.text(descLines, PAGE_PADDING_MM, currentY);
+    currentY += descLines.length * 4.5 + 6;
+  }
+
+  // Screenshots section
+  if (images && images.length > 0) {
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(17, 24, 39);
+    pdf.text('Screenshots', PAGE_PADDING_MM, currentY);
+    currentY += 6;
+
+    // Grid layout for screenshots (2 columns, always)
+    const cols = 2;
+    const rows = Math.ceil(images.length / cols);
+    const availableWidth = pageW - PAGE_PADDING_MM * 2;
+    const gap = 4.2; // gap-4 = 16px = 4.2mm
+    const imageWidth = (availableWidth - gap) / cols;
+    const imageHeight = imageWidth * (10 / 16); // 16:10 aspect ratio
+
+    // Check available height for images
+    const footerY = pageH - 15; // Reserve space for footer
+    const availableHeightForImages = footerY - currentY;
+    const maxRowsThatFit = Math.floor(
+      (availableHeightForImages + gap) / (imageHeight + gap)
+    );
+
+    // Use Promise.all to load all images, then draw them
+    const imagePromises = images.map(async (image, index) => {
+      const imageUrl = image?.imageUrl || image?.url || image?.dataUrl;
+      if (!imageUrl) return null;
+
+      try {
+        const optimizedImage = await getOptimizedImage(imageUrl);
+        const img = await new Promise((resolve, reject) => {
+          const imgEl = new Image();
+          imgEl.onload = () => resolve(imgEl);
+          imgEl.onerror = reject;
+          imgEl.src = optimizedImage;
+        });
+
+        return {
+          index,
+          optimizedImage,
+          img,
+          width: img.width,
+          height: img.height,
+        };
+      } catch (error) {
+        console.error(`Error loading image ${index}:`, error);
+        return null;
+      }
+    });
+
+    const loadedImages = await Promise.all(imagePromises);
+
+    // Draw images
+    for (let i = 0; i < loadedImages.length; i++) {
+      const imageData = loadedImages[i];
+      if (!imageData) continue;
+
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      const x = PAGE_PADDING_MM + col * (imageWidth + gap);
+      const y = currentY + row * (imageHeight + gap);
+
+      // Check if this row fits on the page
+      if (row >= maxRowsThatFit && row > 0) {
+        // This would need to go to next page, but we'll try to fit it
+        // For now, just continue drawing
+      }
+
+      const imgAspectRatio = imageData.width / imageData.height;
+      const slotAspectRatio = 16 / 10;
+
+      let w, h;
+      if (imgAspectRatio > slotAspectRatio) {
+        w = imageWidth;
+        h = imageWidth / imgAspectRatio;
+        if (h > imageHeight) {
+          h = imageHeight;
+          w = imageHeight * imgAspectRatio;
+        }
+      } else {
+        h = imageHeight;
+        w = imageHeight * imgAspectRatio;
+        if (w > imageWidth) {
+          w = imageWidth;
+          h = imageWidth / imgAspectRatio;
+        }
+      }
+
+      const slotX = x + (imageWidth - w) / 2;
+      const slotY = y + (imageHeight - h) / 2;
+
+      pdf.addImage(imageData.optimizedImage, 'JPEG', slotX, slotY, w, h);
+    }
+
+    // Update currentY based on actual rows drawn
+    const actualRowsDrawn = Math.min(rows, maxRowsThatFit);
+    currentY += actualRowsDrawn * (imageHeight + gap) + 6;
+  }
+
+  // Steps to Reproduce (page-specific)
+  if (metadata.stepsToReproduce && metadata.stepsToReproduce.length > 0) {
+    // Check if we have space before footer
+    const footerY = pageH - 10;
+    if (currentY < footerY - 20) {
+      // We have space, add the steps
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(17, 24, 39);
+      pdf.text('Steps to Reproduce', PAGE_PADDING_MM, currentY);
+      currentY += 5;
+
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(75, 85, 99);
+
+      metadata.stepsToReproduce.forEach((step, index) => {
+        // Check if we need to move to next line
+        if (currentY > footerY - 15) {
+          // Not enough space, skip remaining steps
+          return;
+        }
+        const stepText = `${index + 1}. ${step}`;
+        const stepLines = pdf.splitTextToSize(
+          stepText,
+          pageW - PAGE_PADDING_MM * 2 - 5
+        );
+        pdf.text(stepLines, PAGE_PADDING_MM + 5, currentY);
+        currentY += stepLines.length * 4.5 + 1;
+      });
+
+      currentY += 4;
+    }
+  }
+
+  // Footer - only show if it's the first page
+  if (isFirstPage) {
+    const footerY = pageH - 10;
+    pdf.setDrawColor(229, 231, 235); // border-gray-200
+    pdf.line(PAGE_PADDING_MM, footerY, pageW - PAGE_PADDING_MM, footerY);
+
+    const footerTextY = footerY + 4;
+    pdf.setFontSize(8); // text-sm
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(107, 114, 128); // text-gray-500
+    pdf.text('Generated by SnapDoc', PAGE_PADDING_MM, footerTextY);
+    // Note: Page number would need total pages count, which requires two passes
+    // For now, just show "Generated by SnapDoc" on first page
+  }
+}
+
+async function renderGeneralReport(
+  pdf,
+  page,
+  pageW,
+  pageH,
+  PAGE_PADDING_MM,
+  HEADER_MARGIN_BOTTOM_MM,
+  getSpacingMM
+) {
+  const { metadata, images, layoutSettings } = page;
+
+  // Set background color
+  if (layoutSettings.background === 'light-gray') {
+    pdf.setFillColor(245, 246, 248);
+    pdf.rect(0, 0, pageW, pageH, 'F');
+  } else if (layoutSettings.background === 'gradient') {
+    // Simple gradient approximation
+    pdf.setFillColor(245, 246, 248);
+    pdf.rect(0, 0, pageW, pageH, 'F');
+  } else {
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, pageW, pageH, 'F');
+  }
+
+  let currentY = PAGE_PADDING_MM;
+
+  // Add header section (title, description, tags, date)
+  if (metadata.title) {
+    pdf.setFontSize(24); // text-3xl = 30px ≈ 8mm
+    pdf.setFont('helvetica', 'bold');
+    const titleLines = pdf.splitTextToSize(
+      metadata.title,
+      pageW - PAGE_PADDING_MM * 2
+    );
+    pdf.text(titleLines, PAGE_PADDING_MM, currentY);
+    currentY += titleLines.length * 8 + 3; // mb-3 = 12px = 3mm
+  }
+
+  // Tags and date on same line
+  if ((metadata.tags && metadata.tags.length > 0) || metadata.date) {
+    let tagDateX = PAGE_PADDING_MM;
+
+    // Add tags
+    let tagDateY = currentY;
+    if (metadata.tags && metadata.tags.length > 0) {
+      pdf.setFontSize(10); // text-sm = 14px ≈ 3.7mm
+      pdf.setFillColor(90, 83, 135); // #5a5387
+      metadata.tags.forEach((tag, idx) => {
+        const tagTextWidth = pdf.getTextWidth(tag);
+        const tagPadding = 3; // px-3 = 12px = 3.2mm padding
+        const tagWidth = tagTextWidth + tagPadding * 2;
+        const tagHeight = 5; // Height for tag background
+        if (tagDateX + tagWidth > pageW - PAGE_PADDING_MM) {
+          tagDateX = PAGE_PADDING_MM;
+          tagDateY += 6;
+        }
+        // Draw tag background
+        pdf.rect(tagDateX, tagDateY - tagHeight + 1, tagWidth, tagHeight, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(tag, tagDateX + tagPadding, tagDateY);
+        tagDateX += tagWidth + 2.1; // gap-2 = 8px = 2.1mm
+      });
+      pdf.setTextColor(0, 0, 0);
+      tagDateX += 4.2; // gap-4 = 16px = 4.2mm
+    }
+
+    // Add date
+    if (metadata.date) {
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(107, 114, 128); // text-gray-500
+      const dateStr = new Date(metadata.date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      pdf.text(dateStr, tagDateX, tagDateY);
+      pdf.setTextColor(0, 0, 0);
+    }
+
+    // Update currentY based on tag/date height
+    if (tagDateY > currentY) {
+      currentY = tagDateY;
+    }
+
+    currentY += HEADER_MARGIN_BOTTOM_MM;
+  } else {
+    currentY += HEADER_MARGIN_BOTTOM_MM;
+  }
+
+  // Calculate grid layout for images
+  const availableWidth = pageW - PAGE_PADDING_MM * 2;
+  const availableHeight = pageH - currentY - PAGE_PADDING_MM;
+  const spacingMM = getSpacingMM(layoutSettings.spacing);
+
+  let cols, rows;
+  switch (layoutSettings.layout) {
+    case 'single':
+      cols = 1;
+      rows = 1;
+      break;
+    case 'two-row':
+      cols = 1;
+      rows = 2;
+      break;
+    case 'two-column':
+      cols = 2;
+      rows = Math.ceil(images.length / 2);
+      break;
+    case 'three-grid':
+      cols = 3;
+      rows = Math.ceil(images.length / 3);
+      break;
+    case 'four-grid':
+      cols = 2;
+      rows = Math.ceil(images.length / 2);
+      break;
+    default:
+      cols = 1;
+      rows = 1;
+  }
+
+  // Calculate image dimensions based on grid
+  const totalSpacingWidth = spacingMM * (cols - 1);
+  const totalSpacingHeight = spacingMM * (rows - 1);
+  const imageWidth = (availableWidth - totalSpacingWidth) / cols;
+  const imageHeight = imageWidth / (16 / 10); // 16:10 aspect ratio
+
+  // If images are too tall, adjust
+  const maxImageHeight = (availableHeight - totalSpacingHeight) / rows;
+  let finalImageHeight = Math.min(imageHeight, maxImageHeight);
+  let finalImageWidth = finalImageHeight * (16 / 10);
+
+  // Recalculate if width doesn't fit
+  if (finalImageWidth * cols + totalSpacingWidth > availableWidth) {
+    finalImageWidth = (availableWidth - totalSpacingWidth) / cols;
+    finalImageHeight = finalImageWidth / (16 / 10);
+  }
+
+  // Add images in grid - use Promise.all to wait for all images
+  await Promise.all(
+    images.map(async (image, index) => {
+      // Check for image with any URL property
+      const imageUrl = image?.imageUrl || image?.url || image?.dataUrl;
+      if (!image || !imageUrl) {
+        console.warn(
+          `Skipping image at index ${index}: no valid URL found`,
+          image
+        );
+        return;
+      }
+
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+
+      const x = PAGE_PADDING_MM + col * (finalImageWidth + spacingMM);
+      const y = currentY + row * (finalImageHeight + spacingMM);
+
+      try {
+        // Optimize image before adding
+        const optimizedImage = await getOptimizedImage(imageUrl);
+
+        // Load optimized image to get dimensions
+        const img = await new Promise((resolve, reject) => {
+          const imgEl = new Image();
+          imgEl.onload = () => resolve(imgEl);
+          imgEl.onerror = (err) => {
+            console.error(
+              `Failed to load optimized image at index ${index}:`,
+              optimizedImage.substring(0, 50) + '...',
+              err
+            );
+            reject(err);
+          };
+          imgEl.src = optimizedImage;
+        });
+
+        // Calculate actual dimensions maintaining aspect ratio
+        const imgAspectRatio = img.width / img.height;
+        const slotAspectRatio = 16 / 10;
+
+        let w, h;
+        if (imgAspectRatio > slotAspectRatio) {
+          // Image is wider - fit to width
+          w = finalImageWidth;
+          h = finalImageWidth / imgAspectRatio;
+          if (h > finalImageHeight) {
+            h = finalImageHeight;
+            w = finalImageHeight * imgAspectRatio;
+          }
+        } else {
+          // Image is taller - fit to height
+          h = finalImageHeight;
+          w = finalImageHeight * imgAspectRatio;
+          if (w > finalImageWidth) {
+            w = finalImageWidth;
+            h = finalImageWidth / imgAspectRatio;
+          }
+        }
+
+        // Center image in slot
+        const slotX = x + (finalImageWidth - w) / 2;
+        const slotY = y + (finalImageHeight - h) / 2;
+
+        // Use JPEG format for optimized images
+        pdf.addImage(optimizedImage, 'JPEG', slotX, slotY, w, h);
+      } catch (error) {
+        console.error(`Error adding image at index ${index}:`, error);
+        // Continue with other images even if one fails
+      }
+    })
+  );
+
+  // Move cursor BELOW the image grid before adding description
+  const gridHeight = rows * finalImageHeight + totalSpacingHeight;
+  currentY += gridHeight;
+  // Add a little margin below images (similar to mt-4)
+  currentY += 4.2;
+
+  if (metadata.description) {
+    pdf.setFontSize(16); // text-base = 16px ≈ 4.2mm
+    pdf.setFont('helvetica', 'normal');
+    const descLines = pdf.splitTextToSize(
+      metadata.description,
+      pageW - PAGE_PADDING_MM * 2
+    );
+    pdf.text(descLines, PAGE_PADDING_MM, currentY);
+    currentY += descLines.length * 4.2 + 4.2; // line height + margin
+  }
 }

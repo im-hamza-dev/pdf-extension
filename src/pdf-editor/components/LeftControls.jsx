@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LAYOUT_TYPES } from '../utils/constants.js';
+import { LAYOUT_TYPES, REPORT_TYPES, PRIORITY_LEVELS } from '../utils/constants.js';
 
 // Icon components
 const CalendarIcon = ({ className }) => (
@@ -73,10 +73,13 @@ const backgroundOptions = [
 export function LeftControls({
   metadata,
   layoutSettings,
+  reportType,
   onMetadataChange,
   onLayoutSettingsChange,
+  onReportTypeChange,
 }) {
   const [newTag, setNewTag] = useState('');
+  const [newStep, setNewStep] = useState('');
 
   const handleAddTag = () => {
     if (newTag.trim() && !metadata.tags.includes(newTag.trim())) {
@@ -102,27 +105,167 @@ export function LeftControls({
     }
   };
 
+  const handleAddStep = () => {
+    if (newStep.trim()) {
+      const steps = metadata.stepsToReproduce || [];
+      onMetadataChange({
+        ...metadata,
+        stepsToReproduce: [...steps, newStep.trim()]
+      });
+      setNewStep('');
+    }
+  };
+
+  const handleRemoveStep = (indexToRemove) => {
+    const steps = metadata.stepsToReproduce || [];
+    onMetadataChange({
+      ...metadata,
+      stepsToReproduce: steps.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleStepKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddStep();
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
+      {/* Report Type Selector */}
+      <section>
+        <h2 className="text-lg text-gray-900 mb-4">Report Type</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onReportTypeChange(REPORT_TYPES.GENERAL)}
+            className={`flex-1 px-4 py-2.5 rounded-lg text-sm transition-all ${
+              reportType === REPORT_TYPES.GENERAL
+                ? 'bg-[#588AE8] text-white shadow-sm'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            General Report
+          </button>
+          <button
+            onClick={() => onReportTypeChange(REPORT_TYPES.BUG)}
+            className={`flex-1 px-4 py-2.5 rounded-lg text-sm transition-all ${
+              reportType === REPORT_TYPES.BUG
+                ? 'bg-[#588AE8] text-white shadow-sm'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Bug Report
+          </button>
+        </div>
+      </section>
+
+      <div className="border-t border-gray-200"></div>
+
       {/* Metadata Section */}
       <section>
-        <h2 className="text-lg text-gray-900 mb-4">Page Metadata</h2>
+        <h2 className="text-lg text-gray-900 mb-4">
+          {reportType === REPORT_TYPES.BUG ? 'Bug Report Details' : 'Page Metadata'}
+        </h2>
         
         <div className="space-y-4">
-          {/* Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm text-gray-700 mb-1.5">
-              Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              value={metadata.title}
-              onChange={(e) => onMetadataChange({ ...metadata, title: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
-              placeholder="Enter page title..."
-            />
-          </div>
+          {/* Report Title (Bug Report only, shown once) */}
+          {reportType === REPORT_TYPES.BUG && (
+            <>
+              <div>
+                <label htmlFor="reportTitle" className="block text-sm text-gray-700 mb-1.5">
+                  Report Title
+                </label>
+                <input
+                  id="reportTitle"
+                  type="text"
+                  value={metadata.title || ''}
+                  onChange={(e) => onMetadataChange({ ...metadata, title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
+                  placeholder="Bug Report: Login Flow Issue"
+                />
+              </div>
+
+              {/* Report Subtitle (Bug Report only) */}
+              <div>
+                <label htmlFor="reportSubtitle" className="block text-sm text-gray-700 mb-1.5">
+                  Report Subtitle
+                </label>
+                <input
+                  id="reportSubtitle"
+                  type="text"
+                  value={metadata.subtitle || ''}
+                  onChange={(e) => onMetadataChange({ ...metadata, subtitle: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
+                  placeholder="Issue discovered during QA testing on January 15, 2026"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Title (General Report or when not bug report) */}
+          {reportType === REPORT_TYPES.GENERAL && (
+            <div>
+              <label htmlFor="title" className="block text-sm text-gray-700 mb-1.5">
+                Title
+              </label>
+              <input
+                id="title"
+                type="text"
+                value={metadata.title || ''}
+                onChange={(e) => onMetadataChange({ ...metadata, title: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
+                placeholder="Enter page title..."
+              />
+            </div>
+          )}
+
+          {/* Priority (Bug Report only) */}
+          {reportType === REPORT_TYPES.BUG && (
+            <div>
+              <label htmlFor="priority" className="block text-sm text-gray-700 mb-1.5">
+                Priority
+              </label>
+              <select
+                id="priority"
+                value={metadata.priority || 'Medium'}
+                onChange={(e) => onMetadataChange({ ...metadata, priority: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all"
+              >
+                {Object.values(PRIORITY_LEVELS).map(priority => (
+                  <option key={priority} value={priority}>{priority}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Browser and Device (Bug Report only, read-only) */}
+          {reportType === REPORT_TYPES.BUG && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-gray-700 mb-1.5">
+                  Browser
+                </label>
+                <input
+                  type="text"
+                  value={metadata.browser || ''}
+                  readOnly
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1.5">
+                  Device
+                </label>
+                <input
+                  type="text"
+                  value={metadata.device || ''}
+                  readOnly
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div>
@@ -131,19 +274,69 @@ export function LeftControls({
             </label>
             <textarea
               id="description"
-              value={metadata.description}
+              value={metadata.description || ''}
               onChange={(e) => onMetadataChange({ ...metadata, description: e.target.value })}
               rows={3}
               className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all resize-none"
-              placeholder="Enter page description..."
+              placeholder={reportType === REPORT_TYPES.BUG ? "Users are unable to complete the login process..." : "Enter page description..."}
             />
           </div>
 
-          {/* Tags */}
-          <div>
-            <label className="block text-sm text-gray-700 mb-1.5">
-              Tags
-            </label>
+          {/* Steps to Reproduce (Bug Report only) */}
+          {reportType === REPORT_TYPES.BUG && (
+            <div>
+              <label className="block text-sm text-gray-700 mb-1.5">
+                Steps to Reproduce
+              </label>
+              <div className="space-y-2">
+                {(metadata.stepsToReproduce || []).length > 0 && (
+                  <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                    {metadata.stepsToReproduce.map((step, index) => (
+                      <li key={index} className="flex items-start justify-between gap-2">
+                        <span className="flex-1">{step}</span>
+                        <button
+                          onClick={() => handleRemoveStep(index)}
+                          className="hover:bg-red-100 rounded-full p-1 transition-colors flex-shrink-0"
+                          aria-label={`Remove step ${index + 1}`}
+                        >
+                          <XIcon className="w-3 h-3 text-red-600" />
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newStep}
+                    onChange={(e) => setNewStep(e.target.value)}
+                    onKeyDown={handleStepKeyDown}
+                    className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#588AE8] focus:border-transparent transition-all text-sm"
+                    placeholder="Add a step..."
+                  />
+                  <button
+                    onClick={handleAddStep}
+                    disabled={!newStep.trim()}
+                    className="px-3 py-2 rounded-lg text-sm text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                    style={{ backgroundColor: '#588AE8' }}
+                    onMouseOver={(e) => !newStep.trim() ? null : e.currentTarget.style.backgroundColor = '#3d6290'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#588AE8'}
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tags (General Report only) */}
+          {reportType === REPORT_TYPES.GENERAL && (
+            <div>
+              <label className="block text-sm text-gray-700 mb-1.5">
+                Tags
+              </label>
             <div className="space-y-2">
               {metadata.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -189,6 +382,7 @@ export function LeftControls({
               </div>
             </div>
           </div>
+          )}
 
           {/* Date */}
           <div>

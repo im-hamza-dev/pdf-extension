@@ -27,8 +27,11 @@ const TrashIcon = ({ className }) => (
   </svg>
 );
 
-export function RightPreview({ page, onImagesChange, availableImages = [], onAddImage, onImageSelect, onLocalImageAdd, onReplaceRequest, pendingReplaceSlot }) {
+export function RightPreview({ page, reportType, pages, onImagesChange, availableImages = [], onAddImage, onImageSelect, onLocalImageAdd, onReplaceRequest, pendingReplaceSlot }) {
   const { metadata, images, layoutSettings } = page;
+  
+  // For bug reports, get report title/subtitle from first page
+  const firstPageMetadata = reportType === 'bug-report' && pages && pages.length > 0 ? pages[0].metadata : null;
   const [draggedSlotIndex, setDraggedSlotIndex] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
@@ -185,44 +188,192 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
 
         {/* PDF Page Preview */}
         <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
-          <div className="aspect-[8.5/11] p-12 overflow-y-auto" style={getBackgroundStyle(layoutSettings.background)}>
-            {/* Header Section */}
-            <div className="mb-8">
-              <h1 className="text-3xl text-gray-900 mb-3">
-                {metadata.title || 'Untitled Page'}
-              </h1>
-              
-             
-
-              <div className="flex items-center gap-4 flex-wrap">
-                {metadata.tags && metadata.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {metadata.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-3 py-1 rounded-full text-sm text-white"
-                        style={{ backgroundColor: '#5a5387' }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+          <div className="aspect-[8.5/11] overflow-y-auto" style={getBackgroundStyle(layoutSettings.background)}>
+            {reportType === 'bug-report' ? (
+              <>
+                {/* Bug Report Header - Gradient Banner */}
+                <div className="bg-gradient-to-r from-[#588AE8] to-[#5a5387] p-8 text-white">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-white/30" />
+                    <div className="w-3 h-3 rounded-full bg-white/30" />
+                    <div className="w-3 h-3 rounded-full bg-white/30" />
                   </div>
-                )}
+                  {firstPageMetadata?.title && (
+                    <h3 className="text-3xl font-bold mb-2">
+                      {firstPageMetadata.title}
+                    </h3>
+                  )}
+                  {firstPageMetadata?.subtitle && (
+                    <p className="text-white/90 text-lg mb-4">
+                      {firstPageMetadata.subtitle}
+                    </p>
+                  )}
+                </div>
 
-                {metadata.date && (
-                  <div className="text-sm text-gray-500">
-                    {new Date(metadata.date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                {/* Bug Report Content */}
+                <div className="p-8">
+                  {/* Priority, Browser, Device Tags - Above Description */}
+                  {(metadata.priority || metadata.browser || metadata.device) && (
+                    <div className="flex gap-2 mb-6">
+                      {metadata.priority && (
+                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700 border border-gray-300">
+                          Priority: {metadata.priority}
+                        </span>
+                      )}
+                      {metadata.browser && (
+                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700 border border-gray-300">
+                          Browser: {metadata.browser}
+                        </span>
+                      )}
+                      {metadata.device && (
+                        <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700 border border-gray-300">
+                          Device: {metadata.device}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  {metadata.description && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-bold text-gray-900 mb-2">Description</h4>
+                      <p className="text-gray-600 leading-relaxed">
+                        {metadata.description}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* General Report Header Section */}
+                <div className="p-12 mb-8">
+                  <h1 className="text-3xl text-gray-900 mb-3">
+                    {metadata.title || 'Untitled Page'}
+                  </h1>
+                  
+                  <div className="flex items-center gap-4 flex-wrap">
+                    {metadata.tags && metadata.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {metadata.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-3 py-1 rounded-full text-sm text-white"
+                            style={{ backgroundColor: '#5a5387' }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {metadata.date && (
+                      <div className="text-sm text-gray-500">
+                        {new Date(metadata.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
 
             {/* Images Grid */}
-            <div className={`grid ${getGridClass(layoutSettings.layout)} ${getSpacingClass(layoutSettings.spacing)}`}>
+            {reportType === 'bug-report' ? (
+              <div className="px-8 pb-8">
+                <h4 className="text-lg font-bold text-gray-900 mb-4">Screenshots</h4>
+                <div className={`grid grid-cols-2 gap-4`}>
+                  {slots.map((image, index) => (
+                    <div
+                      key={index}
+                      className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all aspect-video ${
+                        image 
+                          ? pendingReplaceSlot === index
+                            ? 'border-[#588AE8] ring-2 ring-[#588AE8]/30'
+                            : 'border-gray-300 hover:border-[#588AE8]' 
+                          : draggedSlotIndex === index
+                          ? 'border-[#588AE8] bg-[#588AE8]/5'
+                          : pendingReplaceSlot === index
+                          ? 'border-[#588AE8] bg-[#588AE8]/5'
+                          : 'border-gray-300 hover:border-[#588AE8]'
+                      }`}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!image) {
+                          setDraggedSlotIndex(index);
+                        }
+                      }}
+                      onDragLeave={() => {
+                        setDraggedSlotIndex(null);
+                      }}
+                      onDrop={(e) => handleDrop(e, index)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!image) {
+                          handleSlotClick(index);
+                        }
+                      }}
+                    >
+                      {image ? (
+                        <>
+                          <img
+                            src={image.url || image.imageUrl || image.dataUrl}
+                            alt={image.alt || 'Screenshot'}
+                            className="w-full h-full object-cover"
+                          />
+                          
+                          {/* Hover Overlay */}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onReplaceRequest) {
+                                  onReplaceRequest(index);
+                                }
+                              }}
+                              className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${
+                                pendingReplaceSlot === index 
+                                  ? 'bg-[#588AE8] text-white hover:bg-[#3d6290]' 
+                                  : 'bg-white text-gray-900'
+                              }`}
+                              title={pendingReplaceSlot === index ? "Click an image from the gallery to replace" : "Click to replace this image"}
+                            >
+                              <UploadIcon className="w-4 h-4" />
+                              {pendingReplaceSlot === index ? 'Select from Gallery' : 'Replace'}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveImage(index);
+                              }}
+                              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 text-sm"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                              Remove
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#588AE8] hover:bg-[#588AE8]/5 transition-all cursor-pointer">
+                          <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#588AE8]/10 flex items-center justify-center transition-colors">
+                            <PlusIcon className="w-6 h-6" />
+                          </div>
+                          <div className="text-sm text-center">
+                            <div className="font-medium">Add Image</div>
+                            <div className="text-xs text-gray-400">Click or drag & drop</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className={`p-12 grid ${getGridClass(layoutSettings.layout)} ${getSpacingClass(layoutSettings.spacing)}`}>
               {slots.map((image, index) => (
                 <div
                   key={index}
@@ -308,23 +459,47 @@ export function RightPreview({ page, onImagesChange, availableImages = [], onAdd
                   )}
                 </div>
               ))}
-            </div>
+              </div>
+            )}
 
-            {/* Empty State */}
-            {images.length === 0 && (
-              <div className="mt-8 flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-white/50">
+            {reportType !== 'bug-report' && images.length === 0 && (
+              <div className="px-12 mt-8 flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-white/50">
                 <ImageIcon className="w-16 h-16 text-gray-300 mb-4" />
                 <h3 className="text-lg text-gray-600 mb-2">No images added yet</h3>
                 <p className="text-sm text-gray-400 mb-4">Select from gallery, drag & drop, or click to add</p>
               </div>
             )}
-            
-            {metadata.description && (
-                <p className="text-base text-gray-600 leading-relaxed mb-4 mt-4">
+
+            {reportType !== 'bug-report' && metadata.description && (
+              <div className="px-12 pb-12">
+                <p className="text-base text-gray-600 leading-relaxed">
                   {metadata.description}
                 </p>
-              )}    
-                    </div>
+              </div>
+            )}
+
+            {reportType === 'bug-report' && (
+              <>
+                {/* Steps to Reproduce (if any) */}
+                {metadata.stepsToReproduce && metadata.stepsToReproduce.length > 0 && (
+                  <div className="px-8 mb-6">
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Steps to Reproduce</h4>
+                    <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                      {metadata.stepsToReproduce.map((step, index) => (
+                        <li key={index}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="px-8 pt-6 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
+                  <span>Generated by SnapDoc</span>
+                  <span>Page 1 of 1</span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Quick Actions Below Preview */}
