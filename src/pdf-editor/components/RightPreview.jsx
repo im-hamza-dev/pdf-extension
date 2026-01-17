@@ -285,7 +285,7 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
             {reportType === 'bug-report' ? (
               <div className="px-8 pb-8">
                 <h4 className="text-lg font-bold text-gray-900 mb-4">Screenshots</h4>
-                <div className={`grid grid-cols-2 gap-4`}>
+                <div className={`grid gap-4 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                   {slots.map((image, index) => (
                     <div
                       key={index}

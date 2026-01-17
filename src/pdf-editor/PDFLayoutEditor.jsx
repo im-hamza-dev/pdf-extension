@@ -446,6 +446,7 @@ function PDFLayoutEditor() {
             metadata={currentPage.metadata}
             layoutSettings={currentPage.layoutSettings}
             reportType={reportType}
+            currentPageIndex={currentPageIndex}
             onMetadataChange={(metadata) => updateCurrentPage({ metadata })}
             onLayoutSettingsChange={handleLayoutSettingsChange}
             onReportTypeChange={setReportType}

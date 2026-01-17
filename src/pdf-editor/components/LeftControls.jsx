@@ -74,6 +74,7 @@ export function LeftControls({
   metadata,
   layoutSettings,
   reportType,
+  currentPageIndex,
   onMetadataChange,
   onLayoutSettingsChange,
   onReportTypeChange,
@@ -169,8 +170,8 @@ export function LeftControls({
         </h2>
         
         <div className="space-y-4">
-          {/* Report Title (Bug Report only, shown once) */}
-          {reportType === REPORT_TYPES.BUG && (
+          {/* Report Title (Bug Report only, shown only on first page) */}
+          {reportType === REPORT_TYPES.BUG && currentPageIndex === 0 && (
             <>
               <div>
                 <label htmlFor="reportTitle" className="block text-sm text-gray-700 mb-1.5">
@@ -186,7 +187,7 @@ export function LeftControls({
                 />
               </div>
 
-              {/* Report Subtitle (Bug Report only) */}
+              {/* Report Subtitle (Bug Report only, shown only on first page) */}
               <div>
                 <label htmlFor="reportSubtitle" className="block text-sm text-gray-700 mb-1.5">
                   Report Subtitle

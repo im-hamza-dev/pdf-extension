@@ -273,33 +273,7 @@ async function renderBugReport(
       headerContentY += subtitleLines.length * 5 + 4;
     }
 
-    // Calculate badge positions
-    headerContentY += 2;
-    const badges = [];
-    if (metadata.priority) {
-      badges.push(`Priority: ${metadata.priority}`);
-    }
-    if (metadata.browser) {
-      badges.push(`Browser: ${metadata.browser}`);
-    }
-    if (metadata.device) {
-      badges.push(`Device: ${metadata.device}`);
-    }
-
-    pdf.setFontSize(8); // text-sm
-    let badgeX = PAGE_PADDING_MM;
-    let badgeY = headerContentY;
-    badges.forEach((badge) => {
-      const badgeWidth = pdf.getTextWidth(badge) + 6;
-      if (badgeX + badgeWidth > pageW - PAGE_PADDING_MM) {
-        badgeX = PAGE_PADDING_MM;
-        badgeY += 5;
-      }
-      badgeX += badgeWidth + 2.1; // gap-2
-    });
-    if (badges.length > 0) {
-      headerContentY = badgeY + 5;
-    }
+    // Don't include badges in header height calculation - they're shown above description
 
     const headerHeight = headerContentY + 8; // Add bottom padding
 
@@ -359,28 +333,48 @@ async function renderBugReport(
       headerY += subtitleLines.length * 5 + 4;
     }
 
-    // Priority, Status, Browser badges (from page metadata)
-    headerY += 2;
-    badgeX = PAGE_PADDING_MM;
-    badges.forEach((badge) => {
-      const badgeWidth = pdf.getTextWidth(badge) + 6;
-      if (badgeX + badgeWidth > pageW - PAGE_PADDING_MM) {
-        badgeX = PAGE_PADDING_MM;
-        headerY += 5;
-      }
-      // Draw badge background with semi-transparent effect
-      pdf.setFillColor(230, 230, 230); // Light gray for semi-transparent effect
-      pdf.roundedRect(badgeX, headerY - 3, badgeWidth, 4, 2, 2, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.text(badge, badgeX + 3, headerY);
-      badgeX += badgeWidth + 2.1; // gap-2
-    });
-    pdf.setTextColor(0, 0, 0);
+    // Don't show badges in header - they'll be shown above description
 
     currentY = headerHeight + PAGE_PADDING_MM;
   }
 
   // Content section
+  // Priority, Browser, Device tags (above description)
+  if (metadata.priority || metadata.browser || metadata.device) {
+    const badges = [];
+    if (metadata.priority) {
+      badges.push(`Priority: ${metadata.priority}`);
+    }
+    if (metadata.browser) {
+      badges.push(`Browser: ${metadata.browser}`);
+    }
+    if (metadata.device) {
+      badges.push(`Device: ${metadata.device}`);
+    }
+
+    if (badges.length > 0) {
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+
+      let badgeX = PAGE_PADDING_MM;
+      badges.forEach((badge) => {
+        const badgeWidth = pdf.getTextWidth(badge) + 6;
+        if (badgeX + badgeWidth > pageW - PAGE_PADDING_MM) {
+          badgeX = PAGE_PADDING_MM;
+          currentY += 5;
+        }
+        // Draw badge background
+        pdf.setFillColor(240, 240, 240);
+        pdf.roundedRect(badgeX, currentY - 3, badgeWidth, 4, 2, 2, 'F');
+        pdf.setTextColor(75, 85, 99); // text-gray-600
+        pdf.text(badge, badgeX + 3, currentY);
+        badgeX += badgeWidth + 2.1; // gap-2
+      });
+      pdf.setTextColor(0, 0, 0);
+      currentY += 6; // Add margin below badges
+    }
+  }
+
   // Description
   if (metadata.description) {
     pdf.setFontSize(12); // text-lg
@@ -408,8 +402,8 @@ async function renderBugReport(
     pdf.text('Screenshots', PAGE_PADDING_MM, currentY);
     currentY += 6;
 
-    // Grid layout for screenshots (2 columns, always)
-    const cols = 2;
+    // Grid layout for screenshots (1 column for single image, 2 columns for multiple)
+    const cols = images.length === 1 ? 1 : 2;
     const rows = Math.ceil(images.length / cols);
     const availableWidth = pageW - PAGE_PADDING_MM * 2;
     const gap = 4.2; // gap-4 = 16px = 4.2mm
