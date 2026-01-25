@@ -29,7 +29,7 @@ const TrashIcon = ({ className }) => (
 
 export function RightPreview({ page, reportType, pages, onImagesChange, availableImages = [], onAddImage, onImageSelect, onLocalImageAdd, onReplaceRequest, pendingReplaceSlot }) {
   const { metadata, images, layoutSettings } = page;
-  
+
   // For bug reports, get report title/subtitle from first page
   const firstPageMetadata = reportType === 'bug-report' && pages && pages.length > 0 ? pages[0].metadata : null;
   const [draggedSlotIndex, setDraggedSlotIndex] = useState(null);
@@ -107,7 +107,7 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
     setIsDraggingOver(false);
     setDraggedSlotIndex(null);
 
-    const files = Array.from(e.dataTransfer.files).filter(file => 
+    const files = Array.from(e.dataTransfer.files).filter(file =>
       file.type.startsWith('image/')
     );
 
@@ -160,7 +160,7 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
   const slots = Array.from({ length: maxImages }, (_, i) => images[i] || null);
 
   return (
-    <div 
+    <div
       className="p-8 flex items-center justify-center min-h-full relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -216,9 +216,8 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                   {(metadata.priority || metadata.browser || metadata.device) && (
                     <div className="flex gap-2 mb-6">
                       {metadata.priority && (
-                        <span className={`px-3 py-1 rounded-full text-sm border ${
-                          PRIORITY_COLORS[metadata.priority]?.tailwind || 'bg-gray-100 text-gray-700 border-gray-300'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-sm border ${PRIORITY_COLORS[metadata.priority]?.tailwind || 'bg-gray-100 text-gray-700 border-gray-300'
+                          }`}>
                           Priority: {metadata.priority}
                         </span>
                       )}
@@ -253,7 +252,7 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                   <h1 className="text-3xl text-gray-900 mb-3">
                     {metadata.title || 'Untitled Page'}
                   </h1>
-                  
+
                   <div className="flex items-center gap-4 flex-wrap">
                     {metadata.tags && metadata.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2">
@@ -291,17 +290,16 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                   {slots.map((image, index) => (
                     <div
                       key={index}
-                      className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all aspect-video ${
-                        image 
+                      className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all aspect-video ${image
                           ? pendingReplaceSlot === index
                             ? 'border-[#588AE8] ring-2 ring-[#588AE8]/30'
-                            : 'border-gray-300 hover:border-[#588AE8]' 
+                            : 'border-gray-300 hover:border-[#588AE8]'
                           : draggedSlotIndex === index
-                          ? 'border-[#588AE8] bg-[#588AE8]/5'
-                          : pendingReplaceSlot === index
-                          ? 'border-[#588AE8] bg-[#588AE8]/5'
-                          : 'border-gray-300 hover:border-[#588AE8]'
-                      }`}
+                            ? 'border-[#588AE8] bg-[#588AE8]/5'
+                            : pendingReplaceSlot === index
+                              ? 'border-[#588AE8] bg-[#588AE8]/5'
+                              : 'border-gray-300 hover:border-[#588AE8]'
+                        }`}
                       onDragOver={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -327,7 +325,7 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                             alt={image.alt || 'Screenshot'}
                             className="w-full h-full object-cover"
                           />
-                          
+
                           {/* Hover Overlay */}
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <button
@@ -337,11 +335,10 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                                   onReplaceRequest(index);
                                 }
                               }}
-                              className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${
-                                pendingReplaceSlot === index 
-                                  ? 'bg-[#588AE8] text-white hover:bg-[#3d6290]' 
+                              className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${pendingReplaceSlot === index
+                                  ? 'bg-[#588AE8] text-white hover:bg-[#3d6290]'
                                   : 'bg-white text-gray-900'
-                              }`}
+                                }`}
                               title={pendingReplaceSlot === index ? "Click an image from the gallery to replace" : "Click to replace this image"}
                             >
                               <UploadIcon className="w-4 h-4" />
@@ -376,91 +373,89 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
               </div>
             ) : (
               <div className={`p-12 grid ${getGridClass(layoutSettings.layout)} ${getSpacingClass(layoutSettings.spacing)}`}>
-              {slots.map((image, index) => (
-                <div
-                  key={index}
-                  className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all ${
-                    image 
-                      ? pendingReplaceSlot === index
-                        ? 'border-[#588AE8] ring-2 ring-[#588AE8]/30'
-                        : 'border-gray-300 hover:border-[#588AE8]' 
-                      : draggedSlotIndex === index
-                      ? 'border-[#588AE8] bg-[#588AE8]/5'
-                      : pendingReplaceSlot === index
-                      ? 'border-[#588AE8] bg-[#588AE8]/5'
-                      : 'border-gray-300 hover:border-[#588AE8]'
-                  }`}
-                  style={{ aspectRatio: '16/10' }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!image) {
-                      setDraggedSlotIndex(index);
-                    }
-                  }}
-                  onDragLeave={() => {
-                    setDraggedSlotIndex(null);
-                  }}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!image) {
-                      handleSlotClick(index);
-                    }
-                  }}
-                >
-                  {image ? (
-                    <>
-                      <img
-                        src={image.url || image.imageUrl || image.dataUrl}
-                        alt={image.alt || 'Screenshot'}
-                        className="w-full h-full object-cover"
-                      />
-                      
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onReplaceRequest) {
-                              onReplaceRequest(index);
-                            }
-                          }}
-                          className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${
-                            pendingReplaceSlot === index 
-                              ? 'bg-[#588AE8] text-white hover:bg-[#3d6290]' 
-                              : 'bg-white text-gray-900'
-                          }`}
-                          title={pendingReplaceSlot === index ? "Click an image from the gallery to replace" : "Click to replace this image"}
-                        >
-                          <UploadIcon className="w-4 h-4" />
-                          {pendingReplaceSlot === index ? 'Select from Gallery' : 'Replace'}
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveImage(index);
-                          }}
-                          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 text-sm"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                          Remove
-                        </button>
+                {slots.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`group relative rounded-lg overflow-hidden border-2 border-dashed bg-gray-50 transition-all ${image
+                        ? pendingReplaceSlot === index
+                          ? 'border-[#588AE8] ring-2 ring-[#588AE8]/30'
+                          : 'border-gray-300 hover:border-[#588AE8]'
+                        : draggedSlotIndex === index
+                          ? 'border-[#588AE8] bg-[#588AE8]/5'
+                          : pendingReplaceSlot === index
+                            ? 'border-[#588AE8] bg-[#588AE8]/5'
+                            : 'border-gray-300 hover:border-[#588AE8]'
+                      }`}
+                    style={{ aspectRatio: '16/10' }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!image) {
+                        setDraggedSlotIndex(index);
+                      }
+                    }}
+                    onDragLeave={() => {
+                      setDraggedSlotIndex(null);
+                    }}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!image) {
+                        handleSlotClick(index);
+                      }
+                    }}
+                  >
+                    {image ? (
+                      <>
+                        <img
+                          src={image.url || image.imageUrl || image.dataUrl}
+                          alt={image.alt || 'Screenshot'}
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onReplaceRequest) {
+                                onReplaceRequest(index);
+                              }
+                            }}
+                            className={`px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm ${pendingReplaceSlot === index
+                                ? 'bg-[#588AE8] text-white hover:bg-[#3d6290]'
+                                : 'bg-white text-gray-900'
+                              }`}
+                            title={pendingReplaceSlot === index ? "Click an image from the gallery to replace" : "Click to replace this image"}
+                          >
+                            <UploadIcon className="w-4 h-4" />
+                            {pendingReplaceSlot === index ? 'Select from Gallery' : 'Replace'}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveImage(index);
+                            }}
+                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 text-sm"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                            Remove
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#588AE8] hover:bg-[#588AE8]/5 transition-all cursor-pointer">
+                        <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#588AE8]/10 flex items-center justify-center transition-colors">
+                          <PlusIcon className="w-6 h-6" />
+                        </div>
+                        <div className="text-sm text-center">
+                          <div className="font-medium">Add Image</div>
+                          <div className="text-xs text-gray-400">Click or drag & drop</div>
+                        </div>
                       </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-gray-400 hover:text-[#588AE8] hover:bg-[#588AE8]/5 transition-all cursor-pointer">
-                      <div className="w-12 h-12 rounded-full bg-gray-200 group-hover:bg-[#588AE8]/10 flex items-center justify-center transition-colors">
-                        <PlusIcon className="w-6 h-6" />
-                      </div>
-                      <div className="text-sm text-center">
-                        <div className="font-medium">Add Image</div>
-                        <div className="text-xs text-gray-400">Click or drag & drop</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                ))}
               </div>
             )}
 
@@ -495,10 +490,10 @@ export function RightPreview({ page, reportType, pages, onImagesChange, availabl
                 )}
 
                 {/* Footer */}
-                <div className="px-8 pt-6 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
+                {/* <div className="px-8 pt-6 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
                   <span>Generated by SnapDoc</span>
                   <span>Page 1 of 1</span>
-                </div>
+                </div> */}
               </>
             )}
           </div>
