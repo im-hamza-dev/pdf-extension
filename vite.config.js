@@ -26,12 +26,6 @@ function copyStaticFiles() {
       } else {
         console.warn('⚠ snap-doc.png not found in project root');
       }
-
-      // Keep old icon for backward compatibility if needed
-      if (existsSync('icon01.jpg')) {
-        copyFileSync('icon01.jpg', 'dist/icon01.jpg');
-        console.log('✓ Copied icon01.jpg');
-      }
     } catch (error) {
       console.error('Error copying static files:', error);
     }

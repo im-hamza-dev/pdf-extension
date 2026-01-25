@@ -3,7 +3,7 @@
   "name": "SnapDoc",
   "version": "1.0.0",
   "description": "Turn Screenshots into Documents",
-  "permissions": ["tabs", "activeTab", "storage", "downloads"],
+  "permissions": ["tabs", "storage", "downloads"],
   "action": {
     "default_title": "SnapDoc - Turn Screenshots into Documents",
     "default_popup": "src/popup/index.html"

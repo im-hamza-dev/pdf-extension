@@ -90,32 +90,6 @@ async function getOptimizedImage(imageUrl) {
   });
 }
 
-export async function exportPDF(images) {
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-
-  for (let i = 0; i < images.length; i++) {
-    if (i > 0) pdf.addPage();
-
-    // Optimize image before adding
-    const optimizedImage = await getOptimizedImage(images[i]);
-    const { width, height } = await measureImage(optimizedImage);
-
-    // Scale to fit within A4 while preserving aspect ratio
-    const scale = Math.min(pageW / pxToMm(width), pageH / pxToMm(height));
-    const w = pxToMm(width) * scale;
-    const h = pxToMm(height) * scale;
-    const x = (pageW - w) / 2;
-    const y = (pageH - h) / 2;
-
-    // Use JPEG format for optimized images
-    pdf.addImage(optimizedImage, 'JPEG', x, y, w, h);
-  }
-
-  pdf.save('screenshots.pdf');
-}
-
 function measureImage(dataUrl) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -129,11 +103,6 @@ function measureImage(dataUrl) {
 // Helper: pixels → mm (assuming 96 DPI ≈ 3.78 px/mm)
 function pxToMm(px) {
   return px / 3.7795275591;
-}
-
-// Helper: mm → pixels
-function mmToPx(mm) {
-  return mm * 3.7795275591;
 }
 
 // Export PDF with custom layout matching the preview
@@ -169,17 +138,6 @@ export async function exportPDFWithLayout(
 
     const page = pages[pageIndex];
     const { metadata, images, layoutSettings } = page;
-
-    // Debug: log page info
-    console.log(`Processing page ${pageIndex + 1}:`, {
-      imagesCount: images?.length || 0,
-      images: images?.map((img) => ({
-        hasImageUrl: !!img?.imageUrl,
-        hasUrl: !!img?.url,
-        hasDataUrl: !!img?.dataUrl,
-        imageId: img?.imageId,
-      })),
-    });
 
     // Set background color
     if (layoutSettings.background === 'light-gray') {

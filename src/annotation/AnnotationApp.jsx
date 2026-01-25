@@ -93,8 +93,6 @@ function AnnotationApp() {
 
       // Load the image after initialization
       imageEditor.loadImageFromURL(screenshot, 'Screenshot').then(() => {
-        console.log('Image loaded successfully');
-        
         // Activate menus - this is required when loading image programmatically
         // Try multiple methods to ensure menus are activated
         setTimeout(() => {
@@ -102,7 +100,6 @@ function AnnotationApp() {
             // Method 1: activeMenuEvent (recommended in GitHub issues)
             if (imageEditor.ui && typeof imageEditor.ui.activeMenuEvent === 'function') {
               imageEditor.ui.activeMenuEvent();
-              console.log('activeMenuEvent called');
             }
             
             // Method 2: Try to activate menu manually if above doesn't work
@@ -296,7 +293,6 @@ function AnnotationApp() {
                 window.close();
               } catch (e) {
                 // Tab might already be closed
-                console.log('Tab closed or cannot be closed');
               }
             }, 100);
           } else {

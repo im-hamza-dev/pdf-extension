@@ -30,7 +30,6 @@ async function clearQueue() {
 
 // Capture the visible area of the current active tab
 async function captureVisible() {
-  console.log('capture visible calls');
   const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'png' });
   await openEditorTab(dataUrl);
 }
@@ -100,7 +99,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         await chrome.tabs.create({ url });
         sendResponse({ ok: true });
       } else if (message.type === 'saveAnnotatedImage') {
-        console.log('Annotated image received:', message.dataUrl);
         // If itemId is provided, update existing item; otherwise add new
         if (message.itemId) {
           const queue = await getQueue();
