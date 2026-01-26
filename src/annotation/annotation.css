@@ -63,3 +63,58 @@ button[class*="Download"],
   margin: 0 !important;
   pointer-events: none !important;
 }
+
+/* Make color palette buttons larger and more clickable */
+.tui-colorpicker-palette-button,
+.tui-colorpicker-palette-preview,
+.tui-colorpicker-palette-preview button,
+.tui-colorpicker-palette li button,
+.tui-colorpicker-palette li,
+.tui-colorpicker-palette-button-container button,
+.tui-image-editor-submenu .tui-colorpicker-palette-button,
+.tui-image-editor-submenu .tui-colorpicker-palette li button {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  border-radius: 4px !important;
+  margin: 4px !important;
+  cursor: pointer !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  transition: transform 0.1s ease, border-color 0.1s ease !important;
+}
+
+.tui-colorpicker-palette-button:hover,
+.tui-colorpicker-palette-preview button:hover,
+.tui-colorpicker-palette li button:hover,
+.tui-colorpicker-palette-button-container button:hover {
+  transform: scale(1.1) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  z-index: 10 !important;
+}
+
+/* Increase spacing in color palette */
+.tui-colorpicker-palette,
+.tui-colorpicker-palette ul {
+  padding: 8px !important;
+  gap: 6px !important;
+}
+
+/* Make the color picker container larger */
+.tui-colorpicker-container {
+  padding: 12px !important;
+}
+
+/* Ensure color palette items have proper spacing */
+.tui-colorpicker-palette li {
+  margin: 4px !important;
+  display: inline-block !important;
+}
+
+.tui-image-editor-container .color-picker-control {
+  width: auto !important;
+  min-width: fit-content !important;
+  max-width: none !important;
+  border-radius: 10px !important;
+  background-color: #3e3e3e !important;
+}
