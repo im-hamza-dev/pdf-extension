@@ -40,10 +40,10 @@ body *:not(button):not(input):not(textarea):not(select) {
 
 body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  width: 800px;
-  height: 600px;
-  min-width: 800px;
-  min-height: 600px;
+  width: 600px;
+  height: 500px;
+  min-width: 600px;
+  min-height: 500px;
   margin: 0 !important;
   padding: 0 !important;
   background: white !important;
@@ -58,10 +58,10 @@ body {
 
 #root,
 #root[style] {
-  width: 800px !important;
-  height: 600px !important;
-  min-width: 800px !important;
-  min-height: 600px !important;
+  width: 600px !important;
+  height: 500px !important;
+  min-width: 600px !important;
+  min-height: 500px !important;
   display: flex !important;
   flex-direction: column !important;
   border: none !important;

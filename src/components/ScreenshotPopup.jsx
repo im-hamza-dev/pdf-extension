@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScreenshotCard } from './ScreenshotCard';
 
 // Simple SVG Icon Components
@@ -118,25 +118,41 @@ export function ScreenshotPopup({
   const [previewIndex, setPreviewIndex] = useState(0);
   const [logoError, setLogoError] = useState(false);
 
+  // Handle Escape key to close modal (only for non-popup context)
+  useEffect(() => {
+    if (isPopupContext) return;
+
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isPopupContext, onClose]);
+
   const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
 
   const formatDate = (date) => {
     const today = new Date();
     const isToday = date.toDateString() === today.toDateString();
-    
+
     if (isToday) {
       return 'Today';
     }
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -151,9 +167,9 @@ export function ScreenshotPopup({
               {logoError ? (
                 <Camera className="w-5 h-5 text-white" />
               ) : (
-                <img 
-                  src={chrome.runtime.getURL('snap-doc.png')} 
-                  alt="SnapDoc Logo" 
+                <img
+                  src={chrome.runtime.getURL('snap-doc.png')}
+                  alt="SnapDoc Logo"
                   className="w-full h-full object-contain"
                   onError={() => setLogoError(true)}
                 />
@@ -166,12 +182,13 @@ export function ScreenshotPopup({
               </p>
             </div>
           </div>
-          
+
           {!isPopupContext && (
             <button
               onClick={onClose}
-              className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
+              className="w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors z-10"
               aria-label="Close"
+              style={{ flexShrink: 0 }}
             >
               <X className="w-5 h-5" />
             </button>
@@ -179,113 +196,113 @@ export function ScreenshotPopup({
         </div>
       </div>
 
-        {/* Action Bar */}
-        <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            {/* Primary Actions */}
+      {/* Action Bar */}
+      <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          {/* Primary Actions */}
+          <button
+            onClick={onCapture}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-white shadow-sm hover:shadow-md transition-all"
+            style={{ backgroundColor: "#588AE8" }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#3d6290"}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#588AE8"}
+          >
+            <Maximize2 className="w-4 h-4" />
+            <span className="text-sm font-medium">Capture Screen</span>
+          </button>
+
+          <button
+            onClick={onExportToLayout}
+            disabled={screenshots.length === 0}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: "#5a5387" }}
+            onMouseOver={(e) => !screenshots.length ? null : e.currentTarget.style.backgroundColor = "#4a4370"}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#5a5387"}
+          >
+            <FileText className="w-4 h-4" />
+            <span className="text-sm font-medium">Layout & Export Report</span>
+          </button>
+
+          <div className="flex-1"></div>
+
+          {/* Secondary Actions */}
+          {screenshots.length > 0 && (
+            <button
+              onClick={() => {
+                if (confirm(`Clear all ${screenshots.length} screenshot(s)?`)) {
+                  onClearAll();
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300 transition-all text-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear All
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Screenshots Grid */}
+      <div className="flex-1 overflow-y-auto p-6">
+        {screenshots.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center py-12">
+            <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+              <Camera className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg text-gray-900 mb-2">No screenshots yet</h3>
+            <p className="text-sm text-gray-500 mb-6 max-w-md">
+              Capture your first screenshot to get started. You can then edit, save, or add them to a PDF report.
+            </p>
             <button
               onClick={onCapture}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-white shadow-sm hover:shadow-md transition-all"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg text-white shadow-sm hover:shadow-md transition-all"
               style={{ backgroundColor: "#588AE8" }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#3d6290"}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#588AE8"}
             >
               <Maximize2 className="w-4 h-4" />
-              <span className="text-sm font-medium">Capture Screen</span>
+              <span className="font-medium">Capture Screen</span>
             </button>
-
-            <button
-              onClick={onExportToLayout}
-              disabled={screenshots.length === 0}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: "#5a5387" }}
-              onMouseOver={(e) => !screenshots.length ? null : e.currentTarget.style.backgroundColor = "#4a4370"}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#5a5387"}
-            >
-              <FileText className="w-4 h-4" />
-              <span className="text-sm font-medium">Layout & Export Report</span>
-            </button>
-
-            <div className="flex-1"></div>
-
-            {/* Secondary Actions */}
-            {screenshots.length > 0 && (
-              <button
-                onClick={() => {
-                  if (confirm(`Clear all ${screenshots.length} screenshot(s)?`)) {
-                    onClearAll();
-                  }
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 hover:border-red-300 transition-all text-sm"
-              >
-                <Trash2 className="w-4 h-4" />
-                Clear All
-              </button>
-            )}
           </div>
-        </div>
-
-        {/* Screenshots Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {screenshots.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center py-12">
-              <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-                <Camera className="w-10 h-10 text-gray-400" />
-              </div>
-              <h3 className="text-lg text-gray-900 mb-2">No screenshots yet</h3>
-              <p className="text-sm text-gray-500 mb-6 max-w-md">
-                Capture your first screenshot to get started. You can then edit, save, or add them to a PDF report.
-              </p>
-              <button
-                onClick={onCapture}
-                className="flex items-center gap-2 px-6 py-3 rounded-lg text-white shadow-sm hover:shadow-md transition-all"
-                style={{ backgroundColor: "#588AE8" }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#3d6290"}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#588AE8"}
-              >
-                <Maximize2 className="w-4 h-4" />
-                <span className="font-medium">Capture Screen</span>
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {screenshots.map((screenshot, index) => (
-                <ScreenshotCard
-                  key={screenshot.id}
-                  screenshot={screenshot}
-                  index={index}
-                  onEdit={() => onEdit(screenshot)}
-                  onSave={() => onSave(screenshot)}
-                  onDelete={() => onDelete(screenshot.id)}
-                  onPreview={() => {
-                    // Open modal preview
-                    setPreviewScreenshot(screenshot);
-                    setPreviewIndex(index);
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {screenshots.length > 0 && (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <FileDown className="w-4 h-4" />
-                <span>
-                  Ready to export? Use <span className="font-medium text-[#5a5387]">Layout & Export Report</span> to create your PDF
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-gray-600">{screenshots.length} ready</span>
-              </div>
-            </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {screenshots.map((screenshot, index) => (
+              <ScreenshotCard
+                key={screenshot.id}
+                screenshot={screenshot}
+                index={index}
+                onEdit={() => onEdit(screenshot)}
+                onSave={() => onSave(screenshot)}
+                onDelete={() => onDelete(screenshot.id)}
+                onPreview={() => {
+                  // Open modal preview
+                  setPreviewScreenshot(screenshot);
+                  setPreviewIndex(index);
+                }}
+              />
+            ))}
           </div>
         )}
+      </div>
+
+      {/* Footer */}
+      {screenshots.length > 0 && (
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <FileDown className="w-4 h-4" />
+              <span>
+                Ready to export? Use <span className="font-medium text-[#5a5387]">Layout & Export Report</span> to create your PDF
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <span className="text-sm text-gray-600">{screenshots.length} ready</span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 
@@ -293,14 +310,14 @@ export function ScreenshotPopup({
   if (isPopupContext) {
     return (
       <>
-        <div 
+        <div
           className="bg-white w-full h-full flex flex-col overflow-hidden rounded-xl"
-          style={{ 
-            backgroundColor: 'white', 
-            width: '100%', 
-            height: '100%', 
-            display: 'flex', 
-            flexDirection: 'column', 
+          style={{
+            backgroundColor: 'white',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
             overflow: 'hidden',
             borderRadius: '12px',
             border: 'none',
@@ -325,8 +342,14 @@ export function ScreenshotPopup({
   // For modal context, wrap in overlay
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <div
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
           {content}
         </div>
       </div>

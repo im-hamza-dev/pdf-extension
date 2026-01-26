@@ -45,12 +45,12 @@ function PDFLayoutEditor() {
     // Create only the first page with the first image (if available)
     const layoutType = LAYOUT_TYPES.SINGLE;
     const maxImagesPerLayout = 1;
-    
+
     const firstImage = images[0];
     const pageItems = await Promise.all(
       [firstImage].map((img, idx) => createLayoutItem(img, idx, layoutType, maxImagesPerLayout))
     );
-    
+
     const pageImagesFormatted = pageItems.map(item => ({
       id: item.id,
       url: item.imageUrl,
@@ -62,7 +62,7 @@ function PDFLayoutEditor() {
 
     const browserInfo = getBrowserInfo();
     const deviceInfo = detectDevice();
-    
+
     const firstPage = {
       id: 'page-0',
       metadata: {
@@ -84,7 +84,7 @@ function PDFLayoutEditor() {
         background: 'white'
       }
     };
-    
+
     // Only create one page initially
     setPages([firstPage]);
   }
@@ -92,7 +92,7 @@ function PDFLayoutEditor() {
   function createEmptyPage() {
     const browserInfo = getBrowserInfo();
     const deviceInfo = detectDevice();
-    
+
     return {
       id: `page-${Date.now()}`,
       metadata: {
@@ -119,7 +119,7 @@ function PDFLayoutEditor() {
   const currentPage = pages[currentPageIndex] || createEmptyPage();
 
   const updateCurrentPage = (updates) => {
-    setPages(pages.map((page, index) => 
+    setPages(pages.map((page, index) =>
       index === currentPageIndex ? { ...page, ...updates } : page
     ));
   };
@@ -132,10 +132,10 @@ function PDFLayoutEditor() {
 
   const handleDeletePage = (index) => {
     if (pages.length === 1) return; // Don't delete if only one page
-    
+
     const newPages = pages.filter((_, i) => i !== index);
     setPages(newPages);
-    
+
     // Adjust current page index if needed
     if (currentPageIndex >= newPages.length) {
       setCurrentPageIndex(newPages.length - 1);
@@ -148,9 +148,9 @@ function PDFLayoutEditor() {
     // If layout changed, we might need to adjust images
     const maxImages =
       currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+        currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+          currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+            currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     // Limit images to max for current layout
     const limitedImages = newImages.slice(0, maxImages);
@@ -160,15 +160,15 @@ function PDFLayoutEditor() {
   const handleLayoutSettingsChange = async (newLayoutSettings) => {
     const oldMaxImages =
       currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
-    
+        currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+          currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+            currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+
     const newMaxImages =
       newLayoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-      newLayoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
-      newLayoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-      newLayoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+        newLayoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+          newLayoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+            newLayoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     // If reducing max images, trim the images array
     let images = currentPage.images;
@@ -181,13 +181,13 @@ function PDFLayoutEditor() {
       const availableImages = queue.filter(
         (img) => !images.some((item) => item.imageId === img.id)
       );
-      
+
       if (availableImages.length > 0) {
         const imagesToAdd = availableImages.slice(0, newMaxImages - images.length);
         const newImageItems = await Promise.all(
           imagesToAdd.map((img, idx) => createLayoutItem(img, images.length + idx, newLayoutSettings.layout, newMaxImages))
         );
-        
+
         const formattedNewImages = newImageItems.map(item => ({
           id: item.id,
           url: item.imageUrl,
@@ -196,12 +196,12 @@ function PDFLayoutEditor() {
           alt: item.title || 'Screenshot',
           imageId: item.imageId,
         }));
-        
+
         images = [...images, ...formattedNewImages];
       }
     }
 
-    updateCurrentPage({ 
+    updateCurrentPage({
       layoutSettings: newLayoutSettings,
       images: images
     });
@@ -210,9 +210,9 @@ function PDFLayoutEditor() {
   const handleAddImage = async (image) => {
     const maxImages =
       currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+        currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+          currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+            currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     if (currentPage.images.length >= maxImages) {
       alert(`Maximum ${maxImages} images allowed for this layout. Please change layout or remove an image first.`);
@@ -240,9 +240,9 @@ function PDFLayoutEditor() {
 
     const maxImages =
       currentPage.layoutSettings.layout === LAYOUT_TYPES.SINGLE ? 1 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
-      currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
+        currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_ROW ? 2 :
+          currentPage.layoutSettings.layout === LAYOUT_TYPES.TWO_COLUMN ? 2 :
+            currentPage.layoutSettings.layout === LAYOUT_TYPES.THREE_GRID ? 3 : 4;
 
     // Check if we have a pending replace operation
     const targetSlot = pendingReplaceSlot !== null ? pendingReplaceSlot : (slotIndex !== null ? slotIndex : null);
@@ -253,7 +253,7 @@ function PDFLayoutEditor() {
         setPendingReplaceSlot(null);
         return;
       }
-      
+
       const newItem = await createLayoutItem(image, targetSlot, currentPage.layoutSettings.layout, maxImages);
       const newImage = {
         id: newItem.id,
@@ -364,7 +364,7 @@ function PDFLayoutEditor() {
 
   // Combine screenshots and local images
   const allAvailableImages = [...queue, ...localImages];
-  
+
   const availableImages = allAvailableImages.filter(
     (img) => !currentPage.images.some((item) => item.imageId === img.id)
   );
@@ -382,9 +382,9 @@ function PDFLayoutEditor() {
                 {logoError ? (
                   <span className="text-white font-semibold">SD</span>
                 ) : (
-                  <img 
-                    src={chrome.runtime.getURL('snap-doc.png')} 
-                    alt="SnapDoc Logo" 
+                  <img
+                    src={chrome.runtime.getURL('snap-doc.png')}
+                    alt="SnapDoc Logo"
                     className="w-full h-full object-contain"
                     onError={() => setLogoError(true)}
                   />
@@ -395,7 +395,7 @@ function PDFLayoutEditor() {
                 <p className="text-sm text-gray-500">Turn Screenshots into Documents</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowScreenshotPopup(true)}
@@ -459,7 +459,7 @@ function PDFLayoutEditor() {
         </div>
 
         {/* Right Side - Image Gallery */}
-        <div className="w-[320px] flex-shrink-0 overflow-hidden">
+        <div className="w-[240px] flex-shrink-0 overflow-hidden">
           <ImageGallery
             screenshots={allAvailableImages}
             onImageSelect={handleImageSelect}
