@@ -31,12 +31,19 @@ const Clock = ({ className }) => (
   </svg>
 );
 
+const Copy = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  </svg>
+);
+
 export function ScreenshotCard({
   screenshot,
   index,
   onEdit,
   onSave,
   onDelete,
+  onCopy,
   onPreview,
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -136,6 +143,18 @@ export function ScreenshotCard({
           >
             <Edit3 className="w-4 h-4" />
             <span className="hidden lg:inline">Edit</span>
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopy();
+            }}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all text-sm"
+            title="Copy screenshot"
+          >
+            <Copy className="w-4 h-4" />
+            <span className="hidden lg:inline">Copy</span>
           </button>
 
           <button

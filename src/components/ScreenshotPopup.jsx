@@ -109,6 +109,7 @@ export function ScreenshotPopup({
   onEdit,
   onSave,
   onDelete,
+  onCopy,
   onExportToLayout,
   onClearAll,
   isPopupContext = false,
@@ -267,19 +268,20 @@ export function ScreenshotPopup({
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {screenshots.map((screenshot, index) => (
-              <ScreenshotCard
-                key={screenshot.id}
-                screenshot={screenshot}
-                index={index}
-                onEdit={() => onEdit(screenshot)}
-                onSave={() => onSave(screenshot)}
-                onDelete={() => onDelete(screenshot.id)}
-                onPreview={() => {
-                  // Open modal preview
-                  setPreviewScreenshot(screenshot);
-                  setPreviewIndex(index);
-                }}
-              />
+                <ScreenshotCard
+                  key={screenshot.id}
+                  screenshot={screenshot}
+                  index={index}
+                  onEdit={() => onEdit(screenshot)}
+                  onSave={() => onSave(screenshot)}
+                  onDelete={() => onDelete(screenshot.id)}
+                  onCopy={() => onCopy(screenshot)}
+                  onPreview={() => {
+                    // Open modal preview
+                    setPreviewScreenshot(screenshot);
+                    setPreviewIndex(index);
+                  }}
+                />
             ))}
           </div>
         )}

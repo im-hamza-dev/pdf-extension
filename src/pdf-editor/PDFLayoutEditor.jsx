@@ -356,6 +356,25 @@ function PDFLayoutEditor() {
     // Queue will refresh when user saves from editor
   }
 
+  async function handleScreenshotCopy(screenshot) {
+    try {
+      // Convert data URL to blob
+      const response = await fetch(screenshot.url);
+      const blob = await response.blob();
+      
+      // Copy to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob })
+      ]);
+      
+      // Show success feedback (you could add a toast notification here)
+      // For now, we'll just silently succeed
+    } catch (error) {
+      console.error('Failed to copy image:', error);
+      alert('Failed to copy image to clipboard. Please try again.');
+    }
+  }
+
   async function handleScreenshotExportToLayout() {
     setShowScreenshotPopup(false);
     // Already in layout editor, just refresh the queue
@@ -488,6 +507,7 @@ function PDFLayoutEditor() {
           onEdit={handleScreenshotEdit}
           onSave={handleScreenshotSave}
           onDelete={handleScreenshotDelete}
+          onCopy={handleScreenshotCopy}
           onExportToLayout={handleScreenshotExportToLayout}
           onClearAll={handleScreenshotClear}
           isPopupContext={false}

@@ -73,6 +73,25 @@ function App() {
     // The queue will refresh when the user saves from the editor
   }
 
+  async function handleCopy(screenshot) {
+    try {
+      // Convert data URL to blob
+      const response = await fetch(screenshot.url);
+      const blob = await response.blob();
+
+      // Copy to clipboard
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob })
+      ]);
+
+      // Show success feedback (you could add a toast notification here)
+      // For now, we'll just silently succeed
+    } catch (error) {
+      console.error('Failed to copy image:', error);
+      alert('Failed to copy image to clipboard. Please try again.');
+    }
+  }
+
   // For popup, we don't need a close handler since it's always visible
   const handleClose = () => {
     // In popup context, we can't close it, but this is here for consistency
@@ -87,6 +106,7 @@ function App() {
         onEdit={handleEdit}
         onSave={handleSave}
         onDelete={handleDelete}
+        onCopy={handleCopy}
         onExportToLayout={handleExport}
         onClearAll={handleClear}
         isPopupContext={true}
