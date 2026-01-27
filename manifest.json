@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "SnapDoc",
+  "name": "Screenshot to PDF Report Builder - SnapDoc",
   "version": "1.0.0",
-  "description": "Turn Screenshots into Documents",
+  "description": "Turn screenshots into clean, professional PDF reports.",
   "permissions": ["tabs", "storage", "downloads", "activeTab"],
   "action": {
-    "default_title": "SnapDoc - Turn Screenshots into Documents",
+    "default_title": "SnapDoc - Screenshot to PDF Report Builder",
     "default_popup": "src/popup/index.html"
   },
   "background": {
